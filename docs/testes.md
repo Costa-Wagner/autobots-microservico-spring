@@ -6,8 +6,8 @@ Testes manuais da API com a aplicação em execução (`http://localhost:8080`),
 
 | Ambiente | Ferramenta | Situação |
 |---|---|---|
-| Desenvolvimento | Cliente HTTP (Thunder Client ou similar) | Testes 1 a 25 aprovados |
-| Ubuntu 24.04 | A definir | Pendente |
+| Windows (desenvolvimento) | Cliente HTTP (Thunder Client ou similar) | Testes 1 a 25 aprovados |
+| Ubuntu 24.04 (WSL2) | Cliente HTTP, `./mvnw` | Build e amostra aprovados (ver seção abaixo) |
 
 A coleção de requisições está em [`autobots-automanager.postman_collection.json`](autobots-automanager.postman_collection.json) no formato Postman v2.1, importável no Thunder Client, Postman ou Insomnia.
 
@@ -24,35 +24,51 @@ Ao subir a aplicação, o cliente 1 é criado com:
 
 Os testes dependem desses ids e da ordem. Onde consta **Reiniciar**, os dados voltam ao estado acima.
 
+## Execução no Ubuntu 24.04
+
+Ambiente: WSL2 com Ubuntu 24.04, OpenJDK 17.0.20 e Maven Wrapper (sem Maven instalado). O projeto foi clonado do GitHub para o sistema de arquivos do Linux, que diferencia maiúsculas e minúsculas.
+
+| Verificação | Resultado |
+|---|---|
+| `git clone` do repositório | Concluído |
+| Permissão de execução do `mvnw` | `-rwxr-xr-x` |
+| Quebras de linha do Windows no `mvnw` | Nenhuma (`grep -c $'\r' mvnw` = 0) |
+| `./mvnw clean package` | BUILD SUCCESS (`Tests run: 1, Failures: 0, Errors: 0`) |
+| `./mvnw spring-boot:run` | Aplicação iniciada na porta 8080 |
+
+Testes executados, escolhidos por dependerem de JPA, banco e codificação de caracteres: T01, T08, T13, T18 e a regra do último documento (passos 1, 5 e 6 do T21, com estado próprio). Os demais foram executados apenas no Windows: a lógica é a mesma, na mesma JVM e sobre o mesmo H2 em memória.
+
 ## Resumo
 
-| Teste | Grupo | Descrição | Resultado |
-|---|---|---|---|
-| 1 | Cliente | PUT: atualizar, inserir e preservar | Aprovado |
-| 2 | Cliente | PUT: remover documento omitindo o id | Aprovado |
-| 3 | Cliente | PUT: número de documento duplicado | Aprovado |
-| 4 | Cliente | PUT: campo omitido não apaga listas | Aprovado |
-| 5 | Cliente | PUT: telefone com id que não pertence ao cliente | Aprovado |
-| 6 | Cliente | PUT: cliente inexistente | Aprovado |
-| 7 | Cliente | PUT: endereço parcial pelo cliente | Aprovado |
-| 8 | Cliente | DELETE: excluir cliente e conferir cascade | Aprovado |
-| 9 | Cliente | DELETE: cliente inexistente | Aprovado |
-| 10 | Cliente | DELETE: corpo sem id (antes do ajuste) | Aprovado |
-| 11 | Cliente | DELETE: corpo sem id (após o ajuste) | Aprovado |
-| 12 | Cliente | PUT: corpo sem id | Aprovado |
-| 13 | Telefone | POST de telefone | Aprovado |
-| 14 | Telefone | GET por id e 404 | Aprovado |
-| 15 | Telefone | PUT de telefone (parcial) | Aprovado |
-| 16 | Telefone | DELETE de telefone | Aprovado |
-| 17 | Telefone | Isolamento entre clientes | Aprovado |
-| 18 | Documento | POST de documento | Aprovado |
-| 19 | Documento | GET por id e 404 | Aprovado |
-| 20 | Documento | PUT de documento (parcial) | Aprovado |
-| 21 | Documento | DELETE de documento e bloqueio do último | Aprovado |
-| 22 | Endereço | GET de endereço | Aprovado |
-| 23 | Endereço | PUT de endereço (parcial) | Aprovado |
-| 24 | Cliente | POST: validação aninhada (sem cidade) | Aprovado |
-| 25 | Cliente | POST: cadastro completo e dataCadastro | Aprovado |
+Ubuntu: "Parcial" indica que só parte dos passos foi executada; "—" indica que o teste não foi repetido nesse sistema.
+
+| Teste | Grupo | Descrição | Windows | Ubuntu |
+|---|---|---|---|---|
+| 1 | Cliente | PUT: atualizar, inserir e preservar | Aprovado | Aprovado |
+| 2 | Cliente | PUT: remover documento omitindo o id | Aprovado | — |
+| 3 | Cliente | PUT: número de documento duplicado | Aprovado | — |
+| 4 | Cliente | PUT: campo omitido não apaga listas | Aprovado | — |
+| 5 | Cliente | PUT: telefone com id que não pertence ao cliente | Aprovado | — |
+| 6 | Cliente | PUT: cliente inexistente | Aprovado | — |
+| 7 | Cliente | PUT: endereço parcial pelo cliente | Aprovado | — |
+| 8 | Cliente | DELETE: excluir cliente e conferir cascade | Aprovado | Aprovado |
+| 9 | Cliente | DELETE: cliente inexistente | Aprovado | — |
+| 10 | Cliente | DELETE: corpo sem id (antes do ajuste) | Aprovado | — |
+| 11 | Cliente | DELETE: corpo sem id (após o ajuste) | Aprovado | — |
+| 12 | Cliente | PUT: corpo sem id | Aprovado | — |
+| 13 | Telefone | POST de telefone | Aprovado | Aprovado |
+| 14 | Telefone | GET por id e 404 | Aprovado | — |
+| 15 | Telefone | PUT de telefone (parcial) | Aprovado | — |
+| 16 | Telefone | DELETE de telefone | Aprovado | — |
+| 17 | Telefone | Isolamento entre clientes | Aprovado | — |
+| 18 | Documento | POST de documento | Aprovado | Aprovado |
+| 19 | Documento | GET por id e 404 | Aprovado | — |
+| 20 | Documento | PUT de documento (parcial) | Aprovado | — |
+| 21 | Documento | DELETE de documento e bloqueio do último | Aprovado | Parcial |
+| 22 | Endereço | GET de endereço | Aprovado | — |
+| 23 | Endereço | PUT de endereço (parcial) | Aprovado | — |
+| 24 | Cliente | POST: validação aninhada (sem cidade) | Aprovado | — |
+| 25 | Cliente | POST: cadastro completo e dataCadastro | Aprovado | — |
 
 ## Teste 1 — PUT: atualizar, inserir e preservar
 

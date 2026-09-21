@@ -9,7 +9,12 @@ Microsserviço REST para cadastro de clientes de lojas de manutenção veicular 
 ## 📋 Requisitos
 
 - Java 17
-- Maven 3.5 ou superior
+
+
+## 📋 Requisitos
+
+- Java 17
+- Maven: opcional, pois o projeto inclui o Maven Wrapper (`mvnw`)
 
 ## 🛠 Tecnologias
 
@@ -51,8 +56,10 @@ Versões: Spring Boot 2.6.3 · Java 17 · Bean Validation (`spring-boot-starter-
 ## 🚀 Como executar
 
 ```bash
-./mvnw spring-boot:run
+./mvnw spring-boot:run        # Linux, macOS e Git Bash
+.\mvnw.cmd spring-boot:run    # PowerShell (Windows)
 ```
+Execute na raiz do projeto, a pasta que contém o `pom.xml`. Na primeira execução o wrapper baixa o Maven, então é preciso ter internet. Com o Maven instalado, `mvn spring-boot:run` também funciona.
 
 - Porta padrão: `8080`.
 - O banco H2 é em memória: os dados são recriados a cada inicialização.
@@ -64,7 +71,7 @@ Versões: Spring Boot 2.6.3 · Java 17 · Bean Validation (`spring-boot-starter-
 com.autobots.automanager
 ├── entidades      Cliente, Documento, Endereco, Telefone
 ├── repositorios   ClienteRepositorio
-├── controles      ClienteControle, DocumentoControle, EnderecoControle, TelefoneControle
+├── controles      ClienteControle, TelefoneControle, DocumentoControle, EnderecoControle
 ├── modelo         ClienteSelecionador, *Atualizador, StringVerificadorNulo
 └── excecoes       TratadorDeExcecoes e exceções de negócio
 ```
@@ -224,6 +231,15 @@ Os testes foram executados manualmente contra a API em execução, uma requisiç
 | Telefone | POST, GET, PUT, DELETE e isolamento entre clientes |
 | Documento | POST, GET, PUT, DELETE, número duplicado e bloqueio do último documento |
 | Endereço | GET e PUT parcial |
+
+## 🖥 Compatibilidade
+
+| Sistema | Situação |
+|---|---|
+| Windows (desenvolvimento) | Roteiro completo, testes 1 a 25 |
+| Ubuntu 24.04 (WSL2) | Build com `./mvnw clean package` e amostra dos testes (T01, T08, T13, T18 e regra do último documento). Detalhes em [docs/testes.md](docs/testes.md) |
+
+O `mvnw` é versionado com permissão de execução e quebra de linha LF (`.gitattributes`), o que permite rodar no Linux logo após o clone. No Ubuntu basta ter o Java 17 e o Git.
 
 ## 💾 Persistência de dados
 
