@@ -40,7 +40,7 @@ Testes executados, escolhidos por dependerem de JPA, banco e codificação de ca
 
 ## Resumo
 
-Ubuntu: "Parcial" indica que só parte dos passos foi executada; "—" indica que o teste não foi repetido nesse sistema.
+Ubuntu: "—" indica que o teste não foi repetido nesse sistema.
 
 | Teste | Grupo | Descrição | Windows | Ubuntu |
 |---|---|---|---|---|
@@ -64,7 +64,7 @@ Ubuntu: "Parcial" indica que só parte dos passos foi executada; "—" indica qu
 | 18 | Documento | POST de documento | Aprovado | Aprovado |
 | 19 | Documento | GET por id e 404 | Aprovado | — |
 | 20 | Documento | PUT de documento (parcial) | Aprovado | — |
-| 21 | Documento | DELETE de documento e bloqueio do último | Aprovado | Parcial |
+| 21 | Documento | DELETE de documento e bloqueio do último | Aprovado | Aprovado |
 | 22 | Endereço | GET de endereço | Aprovado | — |
 | 23 | Endereço | PUT de endereço (parcial) | Aprovado | — |
 | 24 | Cliente | POST: validação aninhada (sem cidade) | Aprovado | — |
