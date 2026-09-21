@@ -1,0 +1,2409 @@
+{
+  "info": {
+    "name": "AutoBots Automanager",
+    "description": "Roteiro de testes da API. Ver docs/testes.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Cliente",
+      "item": [
+        {
+          "name": "T01 - PUT: atualizar, inserir e preservar",
+          "description": "Pré-condição: Reiniciar a aplicação (volta ao estado do Runner).",
+          "item": [
+            {
+              "name": "T01.1 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: 200. Documentos 1 e 2 e telefone 1 existentes."
+              }
+            },
+            {
+              "name": "T01.2 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"nome\": \"Teste\",\n  \"telefones\": [\n    {\n      \"id\": 1,\n      \"numero\": \"111\"\n    },\n    {\n      \"ddd\": \"11\",\n      \"numero\": \"222\"\n    }\n  ],\n  \"documentos\": [\n    {\n      \"id\": 1\n    },\n    {\n      \"id\": 2\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T01.3 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: nome \"Teste\"; telefone 1 com ddd \"21\" e numero \"111\"; novo telefone id 2 (11/222); documentos 1 e 2 inalterados."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T02 - PUT: remover documento omitindo o id",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T02.1 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"telefones\": [\n    {\n      \"id\": 1\n    },\n    {\n      \"id\": 2\n    }\n  ],\n  \"documentos\": [\n    {\n      \"id\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T02.2 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Documento 2 removido; documento 1 e telefones 1 e 2 intactos."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T03 - PUT: número de documento duplicado",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T03.1 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 409 {\"erro\": \"Dado duplicado ou inválido (ex: número de documento já cadastrado)\"}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"telefones\": [\n    {\n      \"id\": 1\n    },\n    {\n      \"id\": 2\n    }\n  ],\n  \"documentos\": [\n    {\n      \"id\": 1\n    },\n    {\n      \"tipo\": \"CPF\",\n      \"numero\": \"123456789\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T03.2 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Documentos continuam só com o 1 (CPF novo não gravado)."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T04 - PUT: campo omitido não apaga listas",
+          "description": "Pré-condição: Reiniciar a aplicação (volta ao estado do Runner). Exige o ajuste de lista vazia nos atualizadores.",
+          "item": [
+            {
+              "name": "T04.1 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Anotar documentos e telefones."
+              }
+            },
+            {
+              "name": "T04.2 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"nome\": \"Teste 4\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T04.3 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: nome \"Teste 4\"; documentos e telefones idênticos ao primeiro GET."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T05 - PUT: telefone com id que não pertence ao cliente",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T05.1 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 200 sem erro.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"telefones\": [\n    {\n      \"id\": 1\n    },\n    {\n      \"id\": 999,\n      \"numero\": \"000\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T05.2 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Telefone 1 intacto; nenhum telefone com id 999 ou número 000."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T06 - PUT: cliente inexistente",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T06.1 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 999\"}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 999,\n  \"nome\": \"Inexistente\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "T07 - PUT: endereço parcial pelo cliente",
+          "description": "Pré-condição: Reiniciar a aplicação (volta ao estado do Runner). Exige o ajuste do codigoPostal no EnderecoAtualizador.",
+          "item": [
+            {
+              "name": "T07.1 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Documento 2 com tipo \"CPF\"; anotar o endereço."
+              }
+            },
+            {
+              "name": "T07.2 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"endereco\": {\n    \"rua\": \"Rua Nova\",\n    \"codigoPostal\": \"11111000\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T07.3 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: rua \"Rua Nova\" e codigoPostal \"11111000\"; demais campos do endereço, documentos e telefones inalterados."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T08 - DELETE: excluir cliente e conferir cascade",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T08.1 POST /cliente/cadastro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/cadastro",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "cadastro"
+                  ]
+                },
+                "description": "Esperado: 201 com o cliente no corpo. Anotar o id (usado no passo 2; aqui 2).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Cliente Delete\",\n  \"dataNascimento\": \"2000-01-01\",\n  \"documentos\": [\n    {\n      \"tipo\": \"CPF\",\n      \"numero\": \"999888777\"\n    }\n  ],\n  \"telefones\": [\n    {\n      \"ddd\": \"12\",\n      \"numero\": \"911112222\"\n    }\n  ],\n  \"endereco\": {\n    \"rua\": \"Rua A\",\n    \"numero\": \"10\",\n    \"cidade\": \"Sao Jose dos Campos\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T08.2 DELETE /cliente/excluir",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/excluir",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "excluir"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T08.3 GET /cliente/2",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 2\"}."
+              }
+            },
+            {
+              "name": "T08.4 POST /cliente/cadastro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/cadastro",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "cadastro"
+                  ]
+                },
+                "description": "Esperado: 201. O número 999888777 é único: o 201 prova que o documento foi apagado do banco.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Cliente Delete\",\n  \"dataNascimento\": \"2000-01-01\",\n  \"documentos\": [\n    {\n      \"tipo\": \"CPF\",\n      \"numero\": \"999888777\"\n    }\n  ],\n  \"telefones\": [\n    {\n      \"ddd\": \"12\",\n      \"numero\": \"911112222\"\n    }\n  ],\n  \"endereco\": {\n    \"rua\": \"Rua A\",\n    \"numero\": \"10\",\n    \"cidade\": \"Sao Jose dos Campos\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T08.5 GET /cliente/lista",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/lista",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "lista"
+                  ]
+                },
+                "description": "Esperado: Cliente 1 e o novo cliente, sem o excluído repetido."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T09 - DELETE: cliente inexistente",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T09.1 DELETE /cliente/excluir",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/excluir",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "excluir"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 999\"}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 999\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T09.2 GET /cliente/lista",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/lista",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "lista"
+                  ]
+                },
+                "description": "Esperado: Lista igual à anterior; nada apagado."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T10 - DELETE: corpo sem id (antes do ajuste)",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior). Executado antes da criação de IdNaoInformadoException.",
+          "item": [
+            {
+              "name": "T10.1 DELETE /cliente/excluir",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/excluir",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "excluir"
+                  ]
+                },
+                "description": "Esperado: 500 {\"erro\": \"Erro inesperado no servidor\"} (findById(null)).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T10.2 DELETE /cliente/excluir",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/excluir",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "excluir"
+                  ]
+                },
+                "description": "Esperado: 500, mesmo resultado.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"qualquer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T10.3 GET /cliente/lista",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/lista",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "lista"
+                  ]
+                },
+                "description": "Esperado: Nenhum cliente apagado. Este resultado motivou o ajuste dos testes 11 e 12."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T11 - DELETE: corpo sem id (após o ajuste)",
+          "description": "Pré-condição: Reiniciar a aplicação com IdNaoInformadoException e o handler aplicados.",
+          "item": [
+            {
+              "name": "T11.1 DELETE /cliente/excluir",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/excluir",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "excluir"
+                  ]
+                },
+                "description": "Esperado: 400 {\"erro\": \"Id do cliente é obrigatório\"}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T11.2 GET /cliente/lista",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/lista",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "lista"
+                  ]
+                },
+                "description": "Esperado: Nenhum cliente apagado."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T12 - PUT: corpo sem id",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T12.1 PUT /cliente/atualizar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/atualizar",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "atualizar"
+                  ]
+                },
+                "description": "Esperado: 400 {\"erro\": \"Id do cliente é obrigatório\"}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Sem id\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T12.2 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Nome continua \"Pedro Alcântara de Bragança e Bourbon\"."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T24 - POST: validação aninhada (sem cidade)",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T24.1 POST /cliente/cadastro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/cadastro",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "cadastro"
+                  ]
+                },
+                "description": "Esperado: 400 {\"endereco.cidade\": \"Cidade é obrigatória\"}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Teste\",\n  \"nomeSocial\": \"\",\n  \"dataNascimento\": \"1980-11-11\",\n  \"documentos\": [\n    {\n      \"tipo\": \"RG\",\n      \"numero\": \"987321\"\n    }\n  ],\n  \"endereco\": {\n    \"rua\": \"Rua 1\",\n    \"numero\": \"100\"\n  },\n  \"telefones\": [\n    {\n      \"ddd\": \"21\",\n      \"numero\": \"987654321\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "T25 - POST: cadastro completo e dataCadastro",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior). Exige setDataCadastro no ClienteControle.",
+          "item": [
+            {
+              "name": "T25.1 POST /cliente/cadastro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/cadastro",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "cadastro"
+                  ]
+                },
+                "description": "Esperado: 201 com dataCadastro preenchida (data atual).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Teste\",\n  \"nomeSocial\": \"\",\n  \"dataNascimento\": \"1980-11-11\",\n  \"documentos\": [\n    {\n      \"tipo\": \"RG\",\n      \"numero\": \"987321\"\n    }\n  ],\n  \"endereco\": {\n    \"rua\": \"Rua 1\",\n    \"numero\": \"100\",\n    \"cidade\": \"Rio de Janeiro\"\n  },\n  \"telefones\": [\n    {\n      \"ddd\": \"21\",\n      \"numero\": \"987654321\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T25.2 GET /cliente/lista",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/lista",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "lista"
+                  ]
+                },
+                "description": "Esperado: O novo cliente aparece com dataCadastro diferente de null."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Telefone",
+      "item": [
+        {
+          "name": "T13 - POST de telefone",
+          "description": "Pré-condição: Reiniciar a aplicação (volta ao estado do Runner).",
+          "item": [
+            {
+              "name": "T13.1 POST /cliente/1/telefone",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone"
+                  ]
+                },
+                "description": "Esperado: 400 {\"ddd\": \"DDD é obrigatório\", \"numero\": \"Número é obrigatório\"} (ordem dos campos livre).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T13.2 POST /cliente/1/telefone",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone"
+                  ]
+                },
+                "description": "Esperado: 201 com o telefone no corpo, id 2.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ddd\": \"11\",\n  \"numero\": \"222\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T13.3 GET /cliente/1/telefone",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone"
+                  ]
+                },
+                "description": "Esperado: Telefones 1 e 2, nenhum vazio."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T14 - GET por id e 404",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T14.1 GET /cliente/1/telefone/2",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200 {\"id\": 2, \"ddd\": \"11\", \"numero\": \"222\"}."
+              }
+            },
+            {
+              "name": "T14.2 GET /cliente/1/telefone/999",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/999",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "999"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Telefone não encontrado: id 999\"}."
+              }
+            },
+            {
+              "name": "T14.3 GET /cliente/999/telefone/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/999/telefone/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "999",
+                    "telefone",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 999\"}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T15 - PUT de telefone (parcial)",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T15.1 PUT /cliente/1/telefone/2",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"333\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T15.2 GET /cliente/1/telefone/2",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: {\"id\": 2, \"ddd\": \"11\", \"numero\": \"333\"}."
+              }
+            },
+            {
+              "name": "T15.3 PUT /cliente/1/telefone/2",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200; um GET seguinte mostra o telefone inalterado.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T15.4 PUT /cliente/1/telefone/999",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/999",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "999"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Telefone não encontrado: id 999\"}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "T16 - DELETE de telefone",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T16.1 DELETE /cliente/1/telefone/2",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo."
+              }
+            },
+            {
+              "name": "T16.2 GET /cliente/1/telefone",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone"
+                  ]
+                },
+                "description": "Esperado: Só o telefone 1."
+              }
+            },
+            {
+              "name": "T16.3 DELETE /cliente/1/telefone/2",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Telefone não encontrado: id 2\"}."
+              }
+            },
+            {
+              "name": "T16.4 DELETE /cliente/1/telefone/1",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: 200 (remover o último é permitido)."
+              }
+            },
+            {
+              "name": "T16.5 GET /cliente/1/telefone",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone"
+                  ]
+                },
+                "description": "Esperado: []"
+              }
+            },
+            {
+              "name": "T16.6 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Cliente existe com telefones []; documentos e endereço intactos."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T17 - Isolamento entre clientes",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T17.1 POST /cliente/cadastro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/cadastro",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "cadastro"
+                  ]
+                },
+                "description": "Esperado: 201. Cliente 2 com telefone 3 (anotar os ids).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Cliente Isolamento\",\n  \"dataNascimento\": \"2000-01-01\",\n  \"documentos\": [\n    {\n      \"tipo\": \"CPF\",\n      \"numero\": \"555444333\"\n    }\n  ],\n  \"telefones\": [\n    {\n      \"ddd\": \"12\",\n      \"numero\": \"911112222\"\n    }\n  ],\n  \"endereco\": {\n    \"rua\": \"Rua B\",\n    \"numero\": \"20\",\n    \"cidade\": \"Sao Jose dos Campos\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T17.2 GET /cliente/1/telefone/3",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/3",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "3"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Telefone não encontrado: id 3\"}."
+              }
+            },
+            {
+              "name": "T17.3 PUT /cliente/1/telefone/3",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/3",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "3"
+                  ]
+                },
+                "description": "Esperado: 404.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T17.4 DELETE /cliente/1/telefone/3",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone/3",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone",
+                    "3"
+                  ]
+                },
+                "description": "Esperado: 404."
+              }
+            },
+            {
+              "name": "T17.5 GET /cliente/2/telefone/3",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/2/telefone/3",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "2",
+                    "telefone",
+                    "3"
+                  ]
+                },
+                "description": "Esperado: 200 {\"id\": 3, \"ddd\": \"12\", \"numero\": \"911112222\"}; não alterado nem apagado."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Documento",
+      "item": [
+        {
+          "name": "T18 - POST de documento",
+          "description": "Pré-condição: Reiniciar a aplicação (volta ao estado do Runner).",
+          "item": [
+            {
+              "name": "T18.1 POST /cliente/1/documento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: 400 {\"tipo\": \"Tipo é obrigatório\", \"numero\": \"Número é obrigatório\"} (ordem livre).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T18.2 POST /cliente/1/documento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: 409 (número já existente).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipo\": \"CNH\",\n  \"numero\": \"123456789\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T18.3 POST /cliente/1/documento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: 201 com o documento no corpo. Anotar o id (3 ou 4).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipo\": \"CNH\",\n  \"numero\": \"111222333\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T18.4 GET /cliente/1/documento",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: Documentos 1, 2 e o novo, sem vazios nem duplicados."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T19 - GET por id e 404",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T19.1 GET /cliente/1/documento/2",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200 {\"id\": 2, \"tipo\": \"CPF\", \"numero\": \"12345678900\"}."
+              }
+            },
+            {
+              "name": "T19.2 GET /cliente/1/documento/999",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/999",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "999"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Documento não encontrado: id 999\"}."
+              }
+            },
+            {
+              "name": "T19.3 GET /cliente/999/documento/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/999/documento/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "999",
+                    "documento",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 999\"}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T20 - PUT de documento (parcial)",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T20.1 PUT /cliente/1/documento/2",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"98765432100\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T20.2 GET /cliente/1/documento/2",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: {\"id\": 2, \"tipo\": \"CPF\", \"numero\": \"98765432100\"}."
+              }
+            },
+            {
+              "name": "T20.3 PUT /cliente/1/documento/2",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200; documento inalterado.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T20.4 PUT /cliente/1/documento/2",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 409 (número do documento 1). Um GET seguinte mantém 98765432100.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"123456789\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T20.5 PUT /cliente/1/documento/999",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/999",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "999"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Documento não encontrado: id 999\"}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "T21 - DELETE de documento e bloqueio do último",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior). Passo 4 usa o id do CNH criado no teste 18 (aqui 3).",
+          "item": [
+            {
+              "name": "T21.1 DELETE /cliente/1/documento/2",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo."
+              }
+            },
+            {
+              "name": "T21.2 GET /cliente/1/documento",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: Só o documento 1 e o CNH."
+              }
+            },
+            {
+              "name": "T21.3 DELETE /cliente/1/documento/2",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Documento não encontrado: id 2\"}."
+              }
+            },
+            {
+              "name": "T21.4 DELETE /cliente/1/documento/3",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/3",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "3"
+                  ]
+                },
+                "description": "Esperado: 200. Restam só o documento 1."
+              }
+            },
+            {
+              "name": "T21.5 DELETE /cliente/1/documento/1",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: 409 {\"erro\": \"Cliente precisa ter ao menos um documento\"}."
+              }
+            },
+            {
+              "name": "T21.6 GET /cliente/1/documento",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: Documento 1 continua."
+              }
+            },
+            {
+              "name": "T21.7 POST /cliente/1/documento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: 201. O número era do documento 2 apagado: prova que a linha saiu do banco.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipo\": \"CPF\",\n  \"numero\": \"98765432100\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Endereço",
+      "item": [
+        {
+          "name": "T22 - GET de endereço",
+          "description": "Pré-condição: Reiniciar a aplicação (volta ao estado do Runner).",
+          "item": [
+            {
+              "name": "T22.1 GET /cliente/1/endereco",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: 200 com o endereço do Runner, id 1."
+              }
+            },
+            {
+              "name": "T22.2 GET /cliente/999/endereco",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/999/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "999",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 999\"}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T23 - PUT de endereço (parcial)",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T23.1 PUT /cliente/1/endereco",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: 200 sem corpo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rua\": \"Rua Nova\",\n  \"codigoPostal\": \"11111000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T23.2 GET /cliente/1/endereco",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: rua \"Rua Nova\" e codigoPostal \"11111000\"; demais campos como no Runner."
+              }
+            },
+            {
+              "name": "T23.3 PUT /cliente/1/endereco",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: 200; endereço inalterado.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T23.4 PUT /cliente/1/endereco",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: 200; cidade continua \"Rio de Janeiro\".",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cidade\": \"   \"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T23.5 PUT /cliente/1/endereco",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: 200; rua \"Rua Id\" e id do endereço continua 1.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 50,\n  \"rua\": \"Rua Id\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T23.6 PUT /cliente/999/endereco",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/999/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "999",
+                    "endereco"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 999\"}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rua\": \"X\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T23.7 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: Endereço igual ao do passo 5; documentos e telefones intactos."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
