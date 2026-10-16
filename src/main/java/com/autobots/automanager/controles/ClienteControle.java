@@ -23,6 +23,7 @@ import com.autobots.automanager.excecoes.IdNaoInformadoException;
 import com.autobots.automanager.modelo.ClienteAtualizador;
 import com.autobots.automanager.modelo.ClienteSelecionador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
+import com.autobots.automanager.modelo.AdicionadorLinkCliente;
 
 @RestController
 @RequestMapping("/cliente")
@@ -31,6 +32,8 @@ public class ClienteControle {
 	private ClienteRepositorio repositorio;
 	@Autowired
 	private ClienteSelecionador selecionador;
+	@Autowired
+	private AdicionadorLinkCliente adicionadorLink;
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Cliente> obterCliente(@PathVariable long id) {
@@ -39,12 +42,14 @@ public class ClienteControle {
 		if (cliente == null) {
 			throw new ClienteNaoEncontradoException(id);
 		}
+		adicionadorLink.adicionarLink(cliente);
 		return ResponseEntity.ok(cliente);
 	}
 
 	@GetMapping("/lista")
 	public List<Cliente> obterClientes() {
 		List<Cliente> clientes = repositorio.findAll();
+		adicionadorLink.adicionarLink(clientes);
 		return clientes;
 	}
 
@@ -52,6 +57,7 @@ public class ClienteControle {
 	public ResponseEntity<Cliente> cadastrarCliente(@Valid @RequestBody Cliente cliente) {
 		cliente.setDataCadastro(new Date());
 		Cliente salvo = repositorio.save(cliente);
+		adicionadorLink.adicionarLink(salvo);
 		return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
 	}
 

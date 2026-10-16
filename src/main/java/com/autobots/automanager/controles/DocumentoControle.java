@@ -18,17 +18,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Cliente;
 import com.autobots.automanager.entidades.Documento;
+import com.autobots.automanager.entidades.Telefone;
 import com.autobots.automanager.excecoes.ClienteNaoEncontradoException;
 import com.autobots.automanager.excecoes.DocumentoNaoEncontradoException;
 import com.autobots.automanager.excecoes.UltimoDocumentoException;
 import com.autobots.automanager.modelo.DocumentoAtualizador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
+import com.autobots.automanager.modelo.AdicionadorLinkDocumento;
 
 @RestController
 @RequestMapping("/cliente/{clienteId}/documento")
 public class DocumentoControle {
 	@Autowired
 	private ClienteRepositorio repositorio;
+	@Autowired
+	private AdicionadorLinkDocumento adicionador;
 	private DocumentoAtualizador atualizador = new DocumentoAtualizador();
 
 	private Cliente buscarCliente(long clienteId) {
@@ -45,12 +49,16 @@ public class DocumentoControle {
 
 	@GetMapping
 	public List<Documento> listar(@PathVariable long clienteId) {
-		return buscarCliente(clienteId).getDocumentos();
+		List<Documento> lista = buscarCliente(clienteId).getDocumentos();
+		lista.forEach(t -> adicionador.adicionarLink(clienteId, t));
+		return lista;
 	}
 
 	@GetMapping("/{documentoId}")
 	public Documento obter(@PathVariable long clienteId, @PathVariable long documentoId) {
-		return buscarDocumento(buscarCliente(clienteId), documentoId);
+		Documento documento = buscarDocumento(buscarCliente(clienteId), documentoId);
+		adicionador.adicionarLink(clienteId, documento);
+		return documento;
 	}
 
 	@PostMapping
@@ -60,7 +68,9 @@ public class DocumentoControle {
 		cliente.getDocumentos().add(documento);
 		Cliente salvo = repositorio.save(cliente);
 		List<Documento> lista = salvo.getDocumentos();
-		return ResponseEntity.status(HttpStatus.CREATED).body(lista.get(lista.size() - 1));
+		Documento criado = lista.get(lista.size() - 1);
+		adicionador.adicionarLink(clienteId, criado);
+		return ResponseEntity.status(HttpStatus.CREATED).body(criado);
 	}
 
 	@PutMapping("/{documentoId}")

@@ -22,12 +22,15 @@ import com.autobots.automanager.excecoes.ClienteNaoEncontradoException;
 import com.autobots.automanager.excecoes.TelefoneNaoEncontradoException;
 import com.autobots.automanager.modelo.TelefoneAtualizador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
+import com.autobots.automanager.modelo.AdicionadorLinkTelefone;
 
 @RestController
 @RequestMapping("/cliente/{clienteId}/telefone")
 public class TelefoneControle {
 	@Autowired
 	private ClienteRepositorio repositorio;
+	@Autowired
+	private AdicionadorLinkTelefone adicionador;
 	private TelefoneAtualizador atualizador = new TelefoneAtualizador();
 
 	private Cliente buscarCliente(long clienteId) {
@@ -44,12 +47,16 @@ public class TelefoneControle {
 
 	@GetMapping
 	public List<Telefone> listar(@PathVariable long clienteId) {
-		return buscarCliente(clienteId).getTelefones();
+		List<Telefone> lista = buscarCliente(clienteId).getTelefones();
+		lista.forEach(t -> adicionador.adicionarLink(clienteId, t));
+		return lista;
 	}
 
 	@GetMapping("/{telefoneId}")
 	public Telefone obter(@PathVariable long clienteId, @PathVariable long telefoneId) {
-		return buscarTelefone(buscarCliente(clienteId), telefoneId);
+		Telefone telefone = buscarTelefone(buscarCliente(clienteId), telefoneId);
+		adicionador.adicionarLink(clienteId, telefone);
+		return telefone;
 	}
 
 	@PostMapping
@@ -59,7 +66,9 @@ public class TelefoneControle {
 		cliente.getTelefones().add(telefone);
 		Cliente salvo = repositorio.save(cliente);
 		List<Telefone> lista = salvo.getTelefones();
-		return ResponseEntity.status(HttpStatus.CREATED).body(lista.get(lista.size() - 1));
+		Telefone criado = lista.get(lista.size() - 1);
+		adicionador.adicionarLink(clienteId, criado);
+		return ResponseEntity.status(HttpStatus.CREATED).body(criado);
 	}
 
 	@PutMapping("/{telefoneId}")

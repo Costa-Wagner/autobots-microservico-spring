@@ -14,12 +14,15 @@ import com.autobots.automanager.entidades.Endereco;
 import com.autobots.automanager.excecoes.ClienteNaoEncontradoException;
 import com.autobots.automanager.modelo.EnderecoAtualizador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
+import com.autobots.automanager.modelo.AdicionadorLinkEndereco;
 
 @RestController
 @RequestMapping("/cliente/{clienteId}/endereco")
 public class EnderecoControle {
 	@Autowired
 	private ClienteRepositorio repositorio;
+	@Autowired
+	private AdicionadorLinkEndereco adicionador;
 	private EnderecoAtualizador atualizador = new EnderecoAtualizador();
 
 	private Cliente buscarCliente(long clienteId) {
@@ -29,7 +32,9 @@ public class EnderecoControle {
 
 	@GetMapping
 	public Endereco obter(@PathVariable long clienteId) {
-		return buscarCliente(clienteId).getEndereco();
+		Endereco endereco = buscarCliente(clienteId).getEndereco();
+		adicionador.adicionarLink(clienteId, endereco);
+		return endereco;
 	}
 
 	@PutMapping
