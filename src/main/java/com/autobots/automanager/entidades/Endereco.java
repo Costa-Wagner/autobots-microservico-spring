@@ -7,11 +7,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
-public class Endereco {
+public class Endereco extends RepresentationModel<Endereco> {
 	@Id()
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
