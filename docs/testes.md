@@ -69,6 +69,12 @@ Ubuntu: "—" indica que o teste não foi repetido nesse sistema.
 | 23 | Endereço | PUT de endereço (parcial) | Aprovado | — |
 | 24 | Cliente | POST: validação aninhada (sem cidade) | Aprovado | — |
 | 25 | Cliente | POST: cadastro completo e dataCadastro | Aprovado | — |
+| 26 | HATEOAS | GET cliente com links | Aprovado | — |
+| 27 | HATEOAS | Navegação pelos links | Aprovado | — |
+| 28 | HATEOAS | GET lista com links | Aprovado | — |
+| 29 | HATEOAS | POST de filho devolve links | Aprovado | — |
+| 30 | HATEOAS | POST de cliente devolve links | Aprovado | — |
+| 31 | HATEOAS | Links respeitam o cliente dono | Aprovado | — |
 
 ## Teste 1 — PUT: atualizar, inserir e preservar
 
@@ -374,5 +380,74 @@ Ubuntu: "—" indica que o teste não foi repetido nesse sistema.
 |---|---|---|---|
 | 1 | `POST /cliente/cadastro` | `{"nome": "Teste", "nomeSocial": "", "dataNascimento": "1980-11-11", "documentos": [{"tipo": "RG", "numero": "987321"}], "endereco": {"rua": "Rua 1", "numero": "100", "cidade": "Rio de Janeiro"}, "telefones": [{"ddd": "21", "numero": "987654321"}]}` | 201 com dataCadastro preenchida (data atual). |
 | 2 | `GET /cliente/lista` | — | O novo cliente aparece com dataCadastro diferente de null. |
+
+**Resultado:** Aprovado
+
+## Teste 26 — GET cliente com links (RMM 3)
+
+**Grupo:** HATEOAS · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner).
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `GET /cliente/1` | — | 200. `links` do cliente com `self`, `clientes`, `atualizar`, `excluir`, `telefones`, `documentos` e `endereco`. |
+| 2 | (mesma resposta) | — | Cada documento e cada telefone com `links` `self`, plural (`documentos`/`telefones`) e `cliente`. |
+| 3 | (mesma resposta) | — | `endereco.links` com `self` e `cliente`. |
+
+**Resultado:** Aprovado
+
+## Teste 27 — Navegação pelos links
+
+**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `GET` no `href` de `telefones` | — | 200 com a lista de telefones, cada um com `links`. |
+| 2 | `GET` no `href` de `documentos` | — | 200 com a lista de documentos, cada um com `links`. |
+| 3 | `GET` no `href` de `endereco` | — | 200 com o endereço e `links`. |
+| 4 | `GET` no `href` de `cliente` de um telefone | — | 200 com o cliente 1. |
+| 5 | `GET` no `href` de `self` de um documento | — | 200 com o documento. |
+
+**Resultado:** Aprovado
+
+## Teste 28 — GET lista com links
+
+**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `GET /cliente/lista` | — | 200. Cada cliente da lista com `links` (inclui `self`). |
+
+**Resultado:** Aprovado
+
+## Teste 29 — POST de filho devolve links
+
+**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `POST /cliente/1/telefone` | `{"ddd": "11", "numero": "222"}` | 201 com o telefone (id 2) e `links` (`self` apontando para `/cliente/1/telefone/2`). |
+| 2 | `POST /cliente/1/documento` | `{"tipo": "CNH", "numero": "111222333"}` | 201 com o documento (id 3) e `links`. |
+
+**Resultado:** Aprovado
+
+## Teste 30 — POST de cliente devolve links
+
+**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `POST /cliente/cadastro` | `{"nome": "Cliente Links", "dataNascimento": "2000-01-01", "documentos": [{"tipo": "CPF", "numero": "555444333"}], "telefones": [{"ddd": "12", "numero": "911112222"}], "endereco": {"rua": "Rua B", "numero": "20", "cidade": "Sao Jose dos Campos"}}` | 201 com o cliente (id 2) e `links`, inclusive nos filhos. Anotar o id do telefone (3). |
+
+**Resultado:** Aprovado
+
+## Teste 31 — Links respeitam o cliente dono
+
+**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `GET /cliente/2` | — | `href` do telefone 3 contém `/cliente/2/telefone/3`; `cliente` do telefone aponta para `/cliente/2`. |
+| 2 | `GET /cliente/1` | — | Nenhum `href` de filho contém `/cliente/2/`. |
+| 3 | `GET /cliente/999` | — | 404 com corpo `{"erro": "..."}`, sem `links`. |
 
 **Resultado:** Aprovado

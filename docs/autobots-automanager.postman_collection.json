@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "AutoBots Automanager",
-    "description": "Roteiro de testes da API. Ver docs/testes.md.",
+    "description": "Roteiro de testes da API (T01-T25 ATVI, T26-T31 ATVII/HATEOAS). Ver docs/testes.md.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -2399,6 +2399,356 @@
                   ]
                 },
                 "description": "Esperado: Endereço igual ao do passo 5; documentos e telefones intactos."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HATEOAS",
+      "item": [
+        {
+          "name": "T26 - GET cliente com links (RMM 3)",
+          "description": "Pré-condição: Reiniciar a aplicação (volta ao estado do Runner).",
+          "item": [
+            {
+              "name": "T26.1 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: 200. Array links do cliente com rel self, clientes, atualizar, excluir, telefones, documentos e endereco. Cada documento e telefone com links self, plural (documentos/telefones) e cliente. Endereço com links self e cliente."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T27 - Navegação pelos links",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T27.1 GET /cliente/1/telefone",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone"
+                  ]
+                },
+                "description": "href do rel telefones do cliente. Esperado: 200 com a lista de telefones, cada um com links."
+              }
+            },
+            {
+              "name": "T27.2 GET /cliente/1/documento",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "href do rel documentos do cliente. Esperado: 200 com a lista de documentos, cada um com links."
+              }
+            },
+            {
+              "name": "T27.3 GET /cliente/1/endereco",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/endereco",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "endereco"
+                  ]
+                },
+                "description": "href do rel endereco do cliente. Esperado: 200 com o endereço e links."
+              }
+            },
+            {
+              "name": "T27.4 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "href do rel cliente de um telefone. Esperado: 200 com o cliente 1."
+              }
+            },
+            {
+              "name": "T27.5 GET /cliente/1/documento/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento",
+                    "1"
+                  ]
+                },
+                "description": "href do rel self de um documento. Esperado: 200 com o documento."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T28 - GET lista com links",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T28.1 GET /cliente/lista",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/lista",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "lista"
+                  ]
+                },
+                "description": "Esperado: 200. Cada cliente da lista com links (inclui rel self)."
+              }
+            }
+          ]
+        },
+        {
+          "name": "T29 - POST de filho devolve links",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T29.1 POST /cliente/1/telefone",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/telefone",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "telefone"
+                  ]
+                },
+                "description": "Esperado: 201 com o telefone (id 2) e links. O self aponta para /cliente/1/telefone/2.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ddd\": \"11\",\n  \"numero\": \"222\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "T29.2 POST /cliente/1/documento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1/documento",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1",
+                    "documento"
+                  ]
+                },
+                "description": "Esperado: 201 com o documento (id 3 ou 4) e links.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipo\": \"CNH\",\n  \"numero\": \"111222333\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "T30 - POST de cliente devolve links",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T30.1 POST /cliente/cadastro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/cadastro",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "cadastro"
+                  ]
+                },
+                "description": "Esperado: 201 com o cliente (id 2) e links, inclusive nos filhos. Anotar o id do telefone (3).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"Cliente Links\",\n  \"dataNascimento\": \"2000-01-01\",\n  \"documentos\": [\n    {\n      \"tipo\": \"CPF\",\n      \"numero\": \"555444333\"\n    }\n  ],\n  \"telefones\": [\n    {\n      \"ddd\": \"12\",\n      \"numero\": \"911112222\"\n    }\n  ],\n  \"endereco\": {\n    \"rua\": \"Rua B\",\n    \"numero\": \"20\",\n    \"cidade\": \"Sao Jose dos Campos\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "T31 - Links respeitam o cliente dono",
+          "description": "Pré-condição: Não reiniciar (usa o estado do teste anterior).",
+          "item": [
+            {
+              "name": "T31.1 GET /cliente/2",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "2"
+                  ]
+                },
+                "description": "Esperado: href do telefone 3 contém /cliente/2/telefone/3; o rel cliente dele aponta para /cliente/2."
+              }
+            },
+            {
+              "name": "T31.2 GET /cliente/1",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "1"
+                  ]
+                },
+                "description": "Esperado: nenhum href de filho contém /cliente/2/."
+              }
+            },
+            {
+              "name": "T31.3 GET /cliente/999",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/cliente/999",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "cliente",
+                    "999"
+                  ]
+                },
+                "description": "Esperado: 404 {\"erro\": \"Cliente não encontrado: id 999\"}, sem links."
               }
             }
           ]

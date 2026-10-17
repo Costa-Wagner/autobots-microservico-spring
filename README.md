@@ -9,11 +9,6 @@ Microsserviço REST para cadastro de clientes de lojas de manutenção veicular 
 ## 📋 Requisitos
 
 - Java 17
-
-
-## 📋 Requisitos
-
-- Java 17
 - Maven: opcional, pois o projeto inclui o Maven Wrapper (`mvnw`)
 
 ## 🛠 Tecnologias
@@ -72,7 +67,7 @@ com.autobots.automanager
 ├── entidades      Cliente, Documento, Endereco, Telefone
 ├── repositorios   ClienteRepositorio
 ├── controles      ClienteControle, TelefoneControle, DocumentoControle, EnderecoControle
-├── modelo         ClienteSelecionador, *Atualizador, StringVerificadorNulo
+├── modelo         ClienteSelecionador, *Atualizador, AdicionadorLink*, StringVerificadorNulo
 └── excecoes       TratadorDeExcecoes e exceções de negócio
 ```
 
@@ -121,6 +116,54 @@ Cliente 1 ── * Documento
 ## 🏗 Decisão de arquitetura
 
 As entidades filhas não têm CRUD solto (por exemplo, `POST /telefone`), porque não têm referência ao cliente e um registro criado sozinho ficaria sem dono. O CRUD é **aninhado no cliente**, em rotas `/cliente/{clienteId}/...`. Toda rota valida primeiro o cliente e só depois procura a entidade filha dentro dele: um telefone ou documento de outro cliente devolve 404.
+
+## 🔗 REST (RMM) e HATEOAS
+
+| Nível | Característica | Situação |
+|---|---|---|
+| 0 | Um único endpoint e o protocolo HTTP apenas como transporte | Superado |
+| 1 | Recursos com URIs próprias (`/cliente/{id}/telefone/{id}`) | Atendido |
+| 2 | Verbos HTTP e códigos de status adequados (200, 201, 400, 404, 409) | Atendido |
+| 3 | HATEOAS: respostas trazem links para as próximas ações possíveis | Atendido (ATVII) |
+
+As respostas de `GET` e `POST` que devolvem corpo incluem o array `links`, com pares `rel` e `href`. O cliente da API navega pelos links, sem montar URLs por conta própria. `PUT` e `DELETE` respondem 200 sem corpo.
+
+| Recurso | Relações (`rel`) |
+|---|---|
+| Cliente | `self`, `clientes`, `atualizar`, `excluir`, `telefones`, `documentos`, `endereco` |
+| Telefone | `self`, `telefones`, `cliente` |
+| Documento | `self`, `documentos`, `cliente` |
+| Endereço | `self`, `cliente` |
+
+Os links `atualizar` e `excluir` indicam a rota (`/cliente/atualizar` e `/cliente/excluir`). O verbo (`PUT` e `DELETE`) segue a documentação dos endpoints.
+
+Exemplo (`GET /cliente/1`, trecho):
+
+```json
+{
+  "id": 1,
+  "nome": "Pedro Alcântara de Bragança e Bourbon",
+  "telefones": [
+    {
+      "id": 1, "ddd": "21", "numero": "987654321",
+      "links": [
+        { "rel": "self", "href": "http://localhost:8080/cliente/1/telefone/1" },
+        { "rel": "telefones", "href": "http://localhost:8080/cliente/1/telefone" },
+        { "rel": "cliente", "href": "http://localhost:8080/cliente/1" }
+      ]
+    }
+  ],
+  "links": [
+    { "rel": "self", "href": "http://localhost:8080/cliente/1" },
+    { "rel": "clientes", "href": "http://localhost:8080/cliente/lista" },
+    { "rel": "telefones", "href": "http://localhost:8080/cliente/1/telefone" }
+  ]
+}
+```
+
+**Implementação:** as entidades estendem `RepresentationModel` (Spring HATEOAS, via `spring-boot-starter-hateoas`). A montagem dos links fica em classes do pacote `modelo` (`AdicionadorLinkCliente`, `AdicionadorLinkTelefone`, `AdicionadorLinkDocumento`, `AdicionadorLinkEndereco`), que usam `WebMvcLinkBuilder.linkTo(methodOn(...))`. Assim, os links acompanham as rotas dos controllers e não ficam como texto fixo.
+
+**Formato:** sem cabeçalho `Accept` específico, a resposta sai em JSON simples, com o array `links`. Com `Accept: application/hal+json`, os links passam para `_links` (formato HAL).
 
 ## 🔌 Endpoints
 
@@ -231,13 +274,14 @@ Os testes foram executados manualmente contra a API em execução, uma requisiç
 | Telefone | POST, GET, PUT, DELETE e isolamento entre clientes |
 | Documento | POST, GET, PUT, DELETE, número duplicado e bloqueio do último documento |
 | Endereço | GET e PUT parcial |
+| HATEOAS | Links em GET/POST, navegação pelos links, links por cliente dono |
 
 ## 🖥 Compatibilidade
 
 | Sistema | Situação |
 |---|---|
-| Windows (desenvolvimento) | Roteiro completo, testes 1 a 25 |
-| Ubuntu 24.04 (WSL2) | Build com `./mvnw clean package` e amostra dos testes (T01, T08, T13, T18 e regra do último documento). Detalhes em [docs/testes.md](docs/testes.md) |
+| Windows (desenvolvimento) | Roteiro completo, testes 1 a 31 |
+| Ubuntu 24.04 (WSL2) | Build com `./mvnw clean package` e amostra dos testes (T01, T08, T13, T18, T26, T29, T30 e regra do último documento). Detalhes em [docs/testes.md](docs/testes.md) |
 
 O `mvnw` é versionado com permissão de execução e quebra de linha LF (`.gitattributes`), o que permite rodar no Linux logo após o clone. No Ubuntu basta ter o Java 17 e o Git.
 
