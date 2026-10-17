@@ -1,10 +1,70 @@
 # 📚 DSM – Desenvolvimento de Software Multiplataforma – FATEC/SJC
 
-Atividade prática **ATVI** – Prof. Dr. Eng. Gerson Penha.
+Atividades práticas **ATV.I** e **ATV.II** - Desenvolvimento Web III · Prof. Dr. Eng. Gerson Penha.
 
 # 🚗 AutoBots – Automanager
 
 Microsserviço REST para cadastro de clientes de lojas de manutenção veicular e autopeças.
+
+- Microsserviço REST do **AutoBots**, startup de sistemas de gestão para lojas de manutenção veicular e venda de autopeças.
+- O `automanager` é o primeiro módulo do back-end: cadastra e mantém os **clientes** das lojas, com seus documentos, endereço e telefones.
+
+**O que o projeto entrega**
+- CRUD de cliente, com documentos, telefones e endereço tratados como parte do cliente (rotas aninhadas, sem CRUD solto).
+- Validação dos dados de cadastro e respostas de erro padronizadas em JSON.
+- API REST no nível 3 de maturidade (RMM): as respostas trazem links (HATEOAS) para as próximas ações, o que facilita a integração com outros sistemas.
+
+**Evolução do projeto**
+
+| Atividade | Foco | Tag |
+|---|---|---|
+| ATV.I | CRUD completo, validação e tratamento de exceções | `atvi-entrega` |
+| ATV.II | Maturidade REST: HATEOAS (RMM nível 3) | `atvii-entrega` 
+
+## 📑 Sumário
+
+<table>
+<tr>
+<td valign="top">
+
+**Visão geral**
+- [Requisitos](#-requisitos)
+- [Tecnologias](#-tecnologias)
+- [Como executar](#-como-executar)
+
+</td>
+<td valign="top">
+
+**Projeto**
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Estrutura de dependências das classes](#-estrutura-de-dependências-das-classes)
+- [Modelo de dados](#-modelo-de-dados)
+- [Decisão de arquitetura](#-decisão-de-arquitetura)
+- [Arquitetura](#-arquitetura)
+
+</td>
+<td valign="top">
+
+**API**
+- [Estrutura de funcionamento da API](#-estrutura-de-funcionamento-da-api)
+- [Maturidade REST (RMM) e HATEOAS](#-maturidade-rest-rmm-e-hateoas)
+- [Endpoints](#-endpoints)
+- [Validações (cadastro)](#-validações-cadastro)
+- [Tratamento de erros](#-tratamento-de-erros)
+- [Exemplos](#-exemplos)
+
+</td>
+<td valign="top">
+
+**Qualidade e encerramento**
+- [Testes](#-testes)
+- [Compatibilidade](#-compatibilidade)
+- [Persistência de dados](#-persistência-de-dados)
+- [Conceitos aplicados](#-conceitos-aplicados)
+
+</td>
+</tr>
+</table>
 
 ## 📋 Requisitos
 
@@ -116,6 +176,33 @@ Cliente 1 ── * Documento
 ## 🏗 Decisão de arquitetura
 
 As entidades filhas não têm CRUD solto (por exemplo, `POST /telefone`), porque não têm referência ao cliente e um registro criado sozinho ficaria sem dono. O CRUD é **aninhado no cliente**, em rotas `/cliente/{clienteId}/...`. Toda rota valida primeiro o cliente e só depois procura a entidade filha dentro dele: um telefone ou documento de outro cliente devolve 404.
+
+## 🏛 Arquitetura
+
+O AutoBots adota **microsserviços** no back-end. O `automanager` é o microsserviço responsável pelo **cadastro de clientes** (com documentos, endereço e telefones). Ele tem uma única responsabilidade, roda como um processo independente (um `.jar` com Tomcat embutido) e tem o seu próprio banco de dados.
+
+```
+ Outros sistemas                         automanager (este serviço)
+ (front-end, outros       HTTP / JSON    ┌──────────────────────────────┐
+  microsserviços,     ◄────────────────► │ controles   → recebem HTTP   │
+  parceiros)                             │ modelo      → regras         │
+                                         │ repositorios→ acesso a dados │
+                                         │ entidades   → JPA / H2       │
+                                         └──────────────────────────────┘
+```
+
+| Característica | Como aparece no projeto |
+|---|---|
+| Responsabilidade única | Apenas o cadastro de clientes e seus dados |
+| Execução independente | `./mvnw spring-boot:run` sobe o serviço sozinho, na porta 8080 |
+| Dados próprios | Banco H2 em memória, acessado só por este serviço |
+| Comunicação por HTTP/JSON | API REST; nenhum outro sistema acessa o banco diretamente |
+| Sem estado de sessão | Cada requisição é independente; o estado fica no banco |
+| Facilidade de integração | Rotas REST padronizadas e links HATEOAS (RMM nível 3), que permitem a quem consome descobrir as próximas ações pelas respostas |
+
+**Camadas internas:** `controles` expõem as rotas e traduzem exceções em respostas HTTP; `modelo` concentra as regras de negócio (atualizadores e selecionador, cada um com uma responsabilidade); `repositorios` isolam o acesso a dados; `entidades` representam o domínio.
+
+**Limites desta etapa:** o banco em memória serve ao desenvolvimento, porque os dados se perdem ao reiniciar. Também ainda não há autenticação, gateway nem comunicação com outros microsserviços.
 
 ## 🔗 REST (RMM) e HATEOAS
 
