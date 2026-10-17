@@ -6,7 +6,7 @@ Testes manuais da API com a aplicação em execução (`http://localhost:8080`),
 
 | Ambiente | Ferramenta | Situação |
 |---|---|---|
-| Windows (desenvolvimento) | Cliente HTTP (Thunder Client ou similar) | Testes 1 a 25 aprovados |
+| Windows (desenvolvimento) | Cliente HTTP (Thunder Client ou similar) | Testes 1 a 33 aprovados |
 | Ubuntu 24.04 (WSL2) | Cliente HTTP, `./mvnw` | Build e amostra aprovados (ver seção abaixo) |
 
 A coleção de requisições está em [`autobots-automanager.postman_collection.json`](autobots-automanager.postman_collection.json) no formato Postman v2.1, importável no Thunder Client, Postman ou Insomnia.
@@ -75,6 +75,8 @@ Ubuntu: "—" indica que o teste não foi repetido nesse sistema.
 | 29 | HATEOAS | POST de filho devolve links | Aprovado | Aprovado |
 | 30 | HATEOAS | POST de cliente devolve links | Aprovado | Aprovado |
 | 31 | HATEOAS | Links respeitam o cliente dono | Aprovado | — |
+| 32 | Erros | Método HTTP não permitido (405) | Aprovado | — |
+| 33 | Erros | Content-Type não suportado (415) | Aprovado | — |
 
 ## Teste 1 — PUT: atualizar, inserir e preservar
 
@@ -449,5 +451,28 @@ Ubuntu: "—" indica que o teste não foi repetido nesse sistema.
 | 1 | `GET /cliente/2` | — | `href` do telefone 3 contém `/cliente/2/telefone/3`; `cliente` do telefone aponta para `/cliente/2`. |
 | 2 | `GET /cliente/1` | — | Nenhum `href` de filho contém `/cliente/2/`. |
 | 3 | `GET /cliente/999` | — | 404 com corpo `{"erro": "..."}`, sem `links`. |
+
+**Resultado:** Aprovado
+
+## Teste 32 — Método HTTP não permitido (405)
+
+**Grupo:** Erros · **Pré-condição:** Qualquer estado.
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `POST /cliente/lista` | `{}` | 405 {"erro": "Método HTTP não permitido para esta rota"}. |
+| 2 | `DELETE /cliente/1/endereco` | — | 405, mesmo corpo. |
+| 3 | `GET /cliente/lista` | — | 200. |
+
+**Resultado:** Aprovado
+
+## Teste 33 — Content-Type não suportado (415)
+
+**Grupo:** Erros · **Pré-condição:** Qualquer estado.
+
+| # | Requisição | Corpo | Esperado |
+|---|---|---|---|
+| 1 | `PUT /cliente/atualizar` com corpo em formulário (`application/x-www-form-urlencoded`) | `id=1` | 415 {"erro": "Tipo de conteúdo não suportado: use application/json"}. |
+| 2 | `PUT /cliente/atualizar` com JSON | `{"id": 1, "nome": "Teste 415"}` | 200 sem corpo. |
 
 **Resultado:** Aprovado

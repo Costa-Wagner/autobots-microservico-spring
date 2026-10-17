@@ -11,6 +11,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 @RestControllerAdvice   // intercepta exceções lançadas por qualquer @RestController do projeto
 public class TratadorDeExcecoes {
@@ -81,6 +83,22 @@ public class TratadorDeExcecoes {
 		Map<String, String> erro = new LinkedHashMap<>();
 		erro.put("erro", excecao.getMessage());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+
+	//Content-Type diferente de JSON no corpo da requisição → 415
+	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+	public ResponseEntity<Map<String, String>> tratarMediaType(HttpMediaTypeNotSupportedException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", "Tipo de conteúdo não suportado: use application/json");
+		return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(erro);
+	}
+
+	//método HTTP inexistente para a rota (ex: POST em /cliente/lista) → 405
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ResponseEntity<Map<String, String>> tratarMetodoNaoPermitido(HttpRequestMethodNotSupportedException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", "Método HTTP não permitido para esta rota");
+		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(erro);
 	}
 
 	//qualquer erro não previsto pelos handlers acima → 500, com mensagem padrão pro cliente (e printStackTrace() pra você ver o que houve no console durante o desenvolvimento)

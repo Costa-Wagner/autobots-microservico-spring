@@ -237,8 +237,10 @@ Todas as respostas de erro são JSON, tratadas em `TratadorDeExcecoes`.
 | 400 | JSON malformado | `{ "erro": "Corpo da requisição inválido ou malformado" }` |
 | 400 | `id` ausente no PUT/DELETE de cliente | `{ "erro": "Id do cliente é obrigatório" }` |
 | 404 | Cliente, telefone ou documento não encontrado | `{ "erro": "Cliente não encontrado: id 999" }` |
+| 405 | Método HTTP não permitido para a rota | `{ "erro": "Método HTTP não permitido para esta rota" }` |
 | 409 | Número de documento duplicado | `{ "erro": "Dado duplicado ou inválido (ex: número de documento já cadastrado)" }` |
 | 409 | Remoção do último documento | `{ "erro": "Cliente precisa ter ao menos um documento" }` |
+| 415 | Content-Type diferente de `application/json` | `{ "erro": "Tipo de conteúdo não suportado: use application/json" }` |
 | 500 | Erro não previsto | `{ "erro": "Erro inesperado no servidor" }` |
 
 ## 📨 Exemplos
