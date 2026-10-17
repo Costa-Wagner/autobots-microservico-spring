@@ -36,7 +36,7 @@ Ambiente: WSL2 com Ubuntu 24.04, OpenJDK 17.0.20 e Maven Wrapper (sem Maven inst
 | `./mvnw clean package` | BUILD SUCCESS (`Tests run: 1, Failures: 0, Errors: 0`) |
 | `./mvnw spring-boot:run` | Aplicação iniciada na porta 8080 |
 
-Testes executados, escolhidos por dependerem de JPA, banco e codificação de caracteres: T01, T08, T13, T18 e a regra do último documento (passos 1, 5 e 6 do T21, com estado próprio). Os demais foram executados apenas no Windows: a lógica é a mesma, na mesma JVM e sobre o mesmo H2 em memória.
+Testes executados, escolhidos por dependerem de JPA, banco e codificação de caracteres: T01, T08, T13, T18, T26, T29, T30 e a regra do último documento (passos 1, 5 e 6 do T21, com estado próprio). Os demais foram executados apenas no Windows: a lógica é a mesma, na mesma JVM e sobre o mesmo H2 em memória.
 
 ## Resumo
 
@@ -69,11 +69,11 @@ Ubuntu: "—" indica que o teste não foi repetido nesse sistema.
 | 23 | Endereço | PUT de endereço (parcial) | Aprovado | — |
 | 24 | Cliente | POST: validação aninhada (sem cidade) | Aprovado | — |
 | 25 | Cliente | POST: cadastro completo e dataCadastro | Aprovado | — |
-| 26 | HATEOAS | GET cliente com links | Aprovado | — |
+| 26 | HATEOAS | GET cliente com links | Aprovado | Aprovado |
 | 27 | HATEOAS | Navegação pelos links | Aprovado | — |
 | 28 | HATEOAS | GET lista com links | Aprovado | — |
-| 29 | HATEOAS | POST de filho devolve links | Aprovado | — |
-| 30 | HATEOAS | POST de cliente devolve links | Aprovado | — |
+| 29 | HATEOAS | POST de filho devolve links | Aprovado | Aprovado |
+| 30 | HATEOAS | POST de cliente devolve links | Aprovado | Aprovado |
 | 31 | HATEOAS | Links respeitam o cliente dono | Aprovado | — |
 
 ## Teste 1 — PUT: atualizar, inserir e preservar
