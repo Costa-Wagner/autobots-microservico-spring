@@ -11,9 +11,13 @@ public class DocumentoAtualizador {
 	//Atualiza um único documento campo a campo — só grava o novo valor se ele não veio nulo/vazio.
 	public void atualizar(Documento documento, Documento atualizacao) {
 		if (atualizacao != null) {
-			if (!verificador.verificar(atualizacao.getTipo())) {
-				documento.setTipo(atualizacao.getTipo());
-			}
+			
+			if (atualizacao.getTipo() != null) {
+					documento.setTipo(atualizacao.getTipo());
+				}
+				if (atualizacao.getDataEmissao() != null) {
+					documento.setDataEmissao(atualizacao.getDataEmissao());
+				}
 			if (!verificador.verificar(atualizacao.getNumero())) {
 				documento.setNumero(atualizacao.getNumero());
 			}
