@@ -168,14 +168,7 @@ public class AutomanagerApplication {
 			venda2.getServicos().add(alinhamento);
 			empresa.getVendas().add(venda2);
 
-			Empresa salva = repositorio.save(empresa);
-
-			// TEMPORÁRIO (remover na etapa 2, quando houver GET): confirma a gravação
-			System.out.println(">>> Empresa id=" + salva.getId()
-					+ " usuarios=" + salva.getUsuarios().size()
-					+ " mercadorias=" + salva.getMercadorias().size()
-					+ " servicos=" + salva.getServicos().size()
-					+ " vendas=" + salva.getVendas().size());
+			repositorio.save(empresa);
 		}
 	}
 }

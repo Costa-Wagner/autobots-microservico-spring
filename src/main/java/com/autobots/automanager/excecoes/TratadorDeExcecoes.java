@@ -101,6 +101,14 @@ public class TratadorDeExcecoes {
 		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(erro);
 	}
 
+	//empresa inexistente → 404
+	@ExceptionHandler(EmpresaNaoEncontradaException.class)
+	public ResponseEntity<Map<String, String>> tratarEmpresaNaoEncontrada(EmpresaNaoEncontradaException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
 	//qualquer erro não previsto pelos handlers acima → 500, com mensagem padrão pro cliente (e printStackTrace() pra você ver o que houve no console durante o desenvolvimento)
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Map<String, String>> tratarErroGenerico(Exception excecao) {
