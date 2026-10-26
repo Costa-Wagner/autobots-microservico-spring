@@ -109,6 +109,22 @@ public class TratadorDeExcecoes {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
 	}
 
+	//usuário inexistente ou que não pertence à empresa da rota → 404
+	@ExceptionHandler(UsuarioNaoEncontradoException.class)
+	public ResponseEntity<Map<String, String>> tratarUsuarioNaoEncontrado(UsuarioNaoEncontradoException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
+	//usuário com vendas não pode ser excluído → 409
+	@ExceptionHandler(UsuarioComVendasException.class)
+	public ResponseEntity<Map<String, String>> tratarUsuarioComVendas(UsuarioComVendasException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+
 	//qualquer erro não previsto pelos handlers acima → 500, com mensagem padrão pro cliente (e printStackTrace() pra você ver o que houve no console durante o desenvolvimento)
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Map<String, String>> tratarErroGenerico(Exception excecao) {

@@ -11,12 +11,15 @@ import org.springframework.stereotype.Component;
 import com.autobots.automanager.controles.EmpresaControle;
 import com.autobots.automanager.controles.EmpresaEnderecoControle;
 import com.autobots.automanager.controles.EmpresaTelefoneControle;
+import com.autobots.automanager.controles.UsuarioControle;
 import com.autobots.automanager.entidades.Empresa;
 
 @Component
 public class AdicionadorLinkEmpresa implements AdicionadorLink<Empresa> {
 	@Autowired
 	private AdicionadorLinkEmpresaTelefone telefoneAdicionador;
+	@Autowired
+	private AdicionadorLinkUsuario usuarioAdicionador;
 	@Autowired
 	private AdicionadorLinkEmpresaEndereco enderecoAdicionador;
 
@@ -35,6 +38,8 @@ public class AdicionadorLinkEmpresa implements AdicionadorLink<Empresa> {
 		empresa.add(linkTo(methodOn(EmpresaControle.class).excluirEmpresa(null)).withRel("excluir"));
 		empresa.add(linkTo(methodOn(EmpresaTelefoneControle.class).listar(empresa.getId())).withRel("telefones"));
 		empresa.add(linkTo(methodOn(EmpresaEnderecoControle.class).obter(empresa.getId())).withRel("endereco"));
+		empresa.add(linkTo(methodOn(UsuarioControle.class).listar(empresa.getId())).withRel("usuarios"));
+		empresa.getUsuarios().forEach(u -> usuarioAdicionador.adicionarLink(empresa.getId(), u));
 		empresa.getTelefones().forEach(t -> telefoneAdicionador.adicionarLink(empresa.getId(), t));
 		if (empresa.getEndereco() != null) {
 			enderecoAdicionador.adicionarLink(empresa.getId(), empresa.getEndereco());
