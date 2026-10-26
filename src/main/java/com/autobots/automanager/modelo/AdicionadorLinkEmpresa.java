@@ -5,13 +5,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.autobots.automanager.controles.EmpresaControle;
+import com.autobots.automanager.controles.EmpresaEnderecoControle;
+import com.autobots.automanager.controles.EmpresaTelefoneControle;
 import com.autobots.automanager.entidades.Empresa;
 
 @Component
 public class AdicionadorLinkEmpresa implements AdicionadorLink<Empresa> {
+	@Autowired
+	private AdicionadorLinkEmpresaTelefone telefoneAdicionador;
+	@Autowired
+	private AdicionadorLinkEmpresaEndereco enderecoAdicionador;
 
 	@Override
 	public void adicionarLink(List<Empresa> lista) {
@@ -26,5 +33,11 @@ public class AdicionadorLinkEmpresa implements AdicionadorLink<Empresa> {
 		empresa.add(linkTo(methodOn(EmpresaControle.class).obterEmpresas()).withRel("empresas"));
 		empresa.add(linkTo(methodOn(EmpresaControle.class).atualizarEmpresa(null)).withRel("atualizar"));
 		empresa.add(linkTo(methodOn(EmpresaControle.class).excluirEmpresa(null)).withRel("excluir"));
+		empresa.add(linkTo(methodOn(EmpresaTelefoneControle.class).listar(empresa.getId())).withRel("telefones"));
+		empresa.add(linkTo(methodOn(EmpresaEnderecoControle.class).obter(empresa.getId())).withRel("endereco"));
+		empresa.getTelefones().forEach(t -> telefoneAdicionador.adicionarLink(empresa.getId(), t));
+		if (empresa.getEndereco() != null) {
+			enderecoAdicionador.adicionarLink(empresa.getId(), empresa.getEndereco());
+		}
 	}
 }
