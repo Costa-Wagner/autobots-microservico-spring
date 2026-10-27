@@ -10,6 +10,7 @@ import com.autobots.automanager.controles.UsuarioDocumentoControle;
 import com.autobots.automanager.controles.UsuarioEmailControle;
 import com.autobots.automanager.controles.UsuarioEnderecoControle;
 import com.autobots.automanager.controles.UsuarioTelefoneControle;
+import com.autobots.automanager.controles.CredencialControle;
 import com.autobots.automanager.controles.EmpresaControle;
 import com.autobots.automanager.controles.UsuarioControle;
 import com.autobots.automanager.entidades.Usuario;
@@ -18,6 +19,8 @@ import com.autobots.automanager.entidades.Usuario;
 public class AdicionadorLinkUsuario {
 	@Autowired
 	private AdicionadorLinkUsuarioFilho filhoAdicionador;
+	@Autowired
+	private AdicionadorLinkCredencial credencialAdicionador;
 	
 	public void adicionarLink(long empresaId, Usuario usuario) {
 		usuario.add(linkTo(methodOn(UsuarioControle.class).obter(empresaId, usuario.getId())).withSelfRel());
@@ -30,6 +33,8 @@ public class AdicionadorLinkUsuario {
 		usuario.getTelefones().forEach(t -> filhoAdicionador.adicionarLink(empresaId, usuario.getId(), t));
 		usuario.getDocumentos().forEach(d -> filhoAdicionador.adicionarLink(empresaId, usuario.getId(), d));
 		usuario.getEmails().forEach(e -> filhoAdicionador.adicionarLink(empresaId, usuario.getId(), e));
+		usuario.add(linkTo(methodOn(CredencialControle.class).listar(empresaId, usuario.getId())).withRel("credenciais"));
+		usuario.getCredenciais().forEach(c -> credencialAdicionador.adicionarLink(empresaId, usuario.getId(), c));
 		if (usuario.getEndereco() != null) {
 			filhoAdicionador.adicionarLink(empresaId, usuario.getId(), usuario.getEndereco());
 		}

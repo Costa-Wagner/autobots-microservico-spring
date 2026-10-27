@@ -15,11 +15,18 @@ import org.springframework.hateoas.RepresentationModel;
 
 import com.autobots.automanager.enumeracoes.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tipo")
+@JsonSubTypes({
+	@JsonSubTypes.Type(value = CredencialUsuarioSenha.class, name = "USUARIO_SENHA"),
+	@JsonSubTypes.Type(value = CredencialCodigoBarra.class, name = "CODIGO_BARRA")
+})
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
@@ -33,5 +40,5 @@ public abstract class Credencial extends RepresentationModel<Credencial> {
 	@Column
 	private Date ultimoAcesso;
 	@Column(nullable = false)
-	private boolean inativo;
+	private Boolean inativo = false;
 }
