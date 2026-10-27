@@ -125,6 +125,14 @@ public class TratadorDeExcecoes {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
 	}
 
+	//e-mail inexistente ou que não pertence ao usuário da rota → 404
+	@ExceptionHandler(EmailNaoEncontradoException.class)
+	public ResponseEntity<Map<String, String>> tratarEmailNaoEncontrado(EmailNaoEncontradoException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
 	//qualquer erro não previsto pelos handlers acima → 500, com mensagem padrão pro cliente (e printStackTrace() pra você ver o que houve no console durante o desenvolvimento)
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Map<String, String>> tratarErroGenerico(Exception excecao) {
