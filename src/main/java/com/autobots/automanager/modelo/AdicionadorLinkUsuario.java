@@ -9,11 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.autobots.automanager.controles.UsuarioDocumentoControle;
 import com.autobots.automanager.controles.UsuarioEmailControle;
 import com.autobots.automanager.controles.UsuarioEnderecoControle;
+import com.autobots.automanager.controles.UsuarioMercadoriaControle;
 import com.autobots.automanager.controles.UsuarioTelefoneControle;
+import com.autobots.automanager.controles.UsuarioVeiculoControle;
 import com.autobots.automanager.controles.CredencialControle;
 import com.autobots.automanager.controles.EmpresaControle;
 import com.autobots.automanager.controles.UsuarioControle;
 import com.autobots.automanager.entidades.Usuario;
+import com.autobots.automanager.enumeracoes.PerfilUsuario;
 
 @Component
 public class AdicionadorLinkUsuario {
@@ -21,6 +24,8 @@ public class AdicionadorLinkUsuario {
 	private AdicionadorLinkUsuarioFilho filhoAdicionador;
 	@Autowired
 	private AdicionadorLinkCredencial credencialAdicionador;
+	@Autowired
+	private AdicionadorLinkRecursos recursosAdicionador;
 	
 	public void adicionarLink(long empresaId, Usuario usuario) {
 		usuario.add(linkTo(methodOn(UsuarioControle.class).obter(empresaId, usuario.getId())).withSelfRel());
@@ -37,6 +42,11 @@ public class AdicionadorLinkUsuario {
 		usuario.getCredenciais().forEach(c -> credencialAdicionador.adicionarLink(empresaId, usuario.getId(), c));
 		if (usuario.getEndereco() != null) {
 			filhoAdicionador.adicionarLink(empresaId, usuario.getId(), usuario.getEndereco());
+		}
+		usuario.add(linkTo(methodOn(UsuarioVeiculoControle.class).listar(empresaId, usuario.getId())).withRel("veiculos"));
+		usuario.getVeiculos().forEach(v -> recursosAdicionador.adicionarLink(empresaId, usuario.getId(), v));
+		if (usuario.getPerfis().contains(PerfilUsuario.FORNECEDOR)) {
+			usuario.add(linkTo(methodOn(UsuarioMercadoriaControle.class).listar(empresaId, usuario.getId())).withRel("mercadorias"));
 		}
 	}
 }

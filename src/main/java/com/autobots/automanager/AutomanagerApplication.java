@@ -132,7 +132,7 @@ public class AutomanagerApplication {
 			roda.setCadastro(new Date());
 			roda.setFabricacao(new Date());
 			roda.setValidade(new Date());
-			roda.setQuantidade(30);
+			roda.setQuantidade(30L);
 			roda.setValor(300.0);
 			empresa.getMercadorias().add(roda);
 			fornecedor.getMercadorias().add(roda);
@@ -140,11 +140,11 @@ public class AutomanagerApplication {
 			Servico trocaRodas = new Servico();
 			trocaRodas.setNome("Troca de rodas");
 			trocaRodas.setDescricao("Troca das rodas do carro por novas");
-			trocaRodas.setValor(50);
+			trocaRodas.setValor(50.0);
 			Servico alinhamento = new Servico();
 			alinhamento.setNome("Alinhamento de rodas");
 			alinhamento.setDescricao("Alinhamento das rodas do carro");
-			alinhamento.setValor(50);
+			alinhamento.setValor(50.0);
 			empresa.getServicos().add(trocaRodas);
 			empresa.getServicos().add(alinhamento);
 

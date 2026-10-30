@@ -36,12 +36,13 @@ public class Mercadoria extends RepresentationModel<Mercadoria> {
 	private Date fabricacao;
 	@Column(nullable = false)
 	private Date cadastro;
+	@NotNull(message = "Quantidade é obrigatória")
 	@PositiveOrZero(message = "Quantidade não pode ser negativa")
 	@Column(nullable = false)
-	private long quantidade;
+	private Long quantidade;
+	@NotNull(message = "Valor é obrigatório")
 	@PositiveOrZero(message = "Valor não pode ser negativo")
 	@Column(nullable = false)
-	private double valor;
-	@Column
+	private Double valor;	@Column
 	private String descricao;
 }
