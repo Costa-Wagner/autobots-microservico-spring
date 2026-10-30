@@ -377,7 +377,7 @@ Testes manuais contra a API em execução, uma requisição por vez, conferindo 
 | Sistema | Situação |
 |---|---|
 | Windows (desenvolvimento) | Testes T34 a T108b |
-| Ubuntu 24.04 (WSL2) | Verificado na ATV.II; não repetido na ATV.III |
+| Ubuntu 24.04 (WSL2) | Build com `./mvnw clean package` e amostra dos testes (T35, T54b, T76b, T104i) |
 
 O `mvnw` é versionado com permissão de execução e quebra de linha LF (`.gitattributes`). No Linux basta ter o Java 17 e o Git.
 

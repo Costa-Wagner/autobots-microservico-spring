@@ -4,7 +4,7 @@ Testes manuais com a aplicação em execução (`http://localhost:8080`), uma re
 
 ## Ambiente
 - Windows, VS Code, Thunder Client (Body → JSON), `./mvnw clean spring-boot:run`.
-- Ubuntu: não repetido nesta atividade.
+- Ubuntu 24.04 (WSL2): build e amostra aprovados (T35, T54b, T76b, T104i). Os demais foram executados apenas no Windows.
 - Onde consta **reiniciar**, os dados voltam ao estado do Runner. Ids de filhos podem variar entre execuções: conferir pelo GET.
 
 ## Dados iniciais (Runner)
