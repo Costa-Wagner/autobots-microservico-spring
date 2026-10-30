@@ -1,16 +1,16 @@
 # 📚 DSM – Desenvolvimento de Software Multiplataforma – FATEC/SJC
 
-Atividades práticas **ATV.I** e **ATV.II** - Desenvolvimento Web III · Prof. Dr. Eng. Gerson Penha.
+Atividades práticas **ATV.I**, **ATV.II** e **ATV.III** - Desenvolvimento Web III · Prof. Dr. Eng. Gerson Penha.
 
 # 🚗 AutoBots – Automanager
 
-Microsserviço REST para cadastro de clientes de lojas de manutenção veicular e autopeças.
+Microsserviço REST para gestão de lojas de manutenção veicular e autopeças.
 
 - Microsserviço REST do **AutoBots**, startup de sistemas de gestão para lojas de manutenção veicular e venda de autopeças.
-- O `automanager` é o primeiro módulo do back-end: cadastra e mantém os **clientes** das lojas, com seus documentos, endereço e telefones.
+- O `automanager` é o primeiro módulo do back-end: cadastra e mantém **empresas** e, dentro delas, usuários (clientes, funcionários e fornecedores), veículos, mercadorias, serviços e vendas.
 
 **O que o projeto entrega**
-- CRUD de cliente, com documentos, telefones e endereço tratados como parte do cliente (rotas aninhadas, sem CRUD solto).
+- CRUD de empresa, com usuários, veículos, mercadorias, serviços e vendas em rotas aninhadas na empresa (sem CRUD solto).
 - Validação dos dados de cadastro e respostas de erro padronizadas em JSON.
 - API REST no nível 3 de maturidade (RMM): as respostas trazem links (HATEOAS) para as próximas ações, o que facilita a integração com outros sistemas.
 
@@ -19,7 +19,8 @@ Microsserviço REST para cadastro de clientes de lojas de manutenção veicular 
 | Atividade | Foco | Tag |
 |---|---|---|
 | ATV.I | CRUD completo, validação e tratamento de exceções | `atvi-entrega` |
-| ATV.II | Maturidade REST: HATEOAS (RMM nível 3) | `atvii-entrega` 
+| ATV.II | Maturidade REST: HATEOAS (RMM nível 3) | `atvii-entrega` |
+| ATV.III | Empresa, usuários, veículos, mercadorias, serviços e vendas | `atviii-entrega` |
 
 ## 📑 Sumário
 
@@ -61,6 +62,7 @@ Microsserviço REST para cadastro de clientes de lojas de manutenção veicular 
 - [Compatibilidade](#-compatibilidade)
 - [Persistência de dados](#-persistência-de-dados)
 - [Conceitos aplicados](#-conceitos-aplicados)
+- [Limitações conhecidas](#-limitações-conhecidas)
 
 </td>
 </tr>
@@ -118,32 +120,35 @@ Execute na raiz do projeto, a pasta que contém o `pom.xml`. Na primeira execuç
 
 - Porta padrão: `8080`.
 - O banco H2 é em memória: os dados são recriados a cada inicialização.
-- Na inicialização, `AutomanagerApplication.Runner` carrega um cliente de exemplo (id 1) com 2 documentos (RG e CPF), 1 telefone e 1 endereço.
+- Na inicialização, `AutomanagerApplication.Runner` carrega uma empresa de exemplo (id 1) com 3 usuários (funcionário, fornecedor e cliente), 1 veículo, 1 mercadoria, 2 serviços e 2 vendas.
 
 ## 🗂 Estrutura do projeto
 
 ```
 com.autobots.automanager
-├── entidades      Cliente, Documento, Endereco, Telefone
-├── repositorios   ClienteRepositorio
-├── controles      ClienteControle, TelefoneControle, DocumentoControle, EnderecoControle
-├── modelo         ClienteSelecionador, *Atualizador, AdicionadorLink*, StringVerificadorNulo
+├── entidades      Empresa, Usuario, Documento, Email, Telefone, Endereco,
+│                  Credencial (UsuarioSenha, CodigoBarra), Mercadoria,
+│                  Servico, Veiculo, Venda
+├── enumeracoes    PerfilUsuario, TipoDocumento, TipoVeiculo
+├── repositorios   EmpresaRepositorio
+├── controles      *Controle de cada recurso (Empresa, Usuario, Venda...)
+├── modelo         BuscadorUsuario, *Atualizador, AdicionadorLink*,
+│                  VendaDados, StringVerificadorNulo
 └── excecoes       TratadorDeExcecoes e exceções de negócio
 ```
 
 ## 🌳 Estrutura de dependências das classes
 
 ``` bash
-ClienteControle ──► ClienteRepositorio ──► Cliente ─┬─► Documento
-      │                                              ├─► Endereco
-      ├──► ClienteSelecionador                       └─► Telefone
-      └──► ClienteAtualizador ─┬─► DocumentoAtualizador
-                               ├─► EnderecoAtualizador
-                               └─► TelefoneAtualizador
-                                   (todos usam StringVerificadorNulo)
-
-TelefoneControle / DocumentoControle / EnderecoControle
-      └──► ClienteRepositorio + Atualizador correspondente
+*Controle ──► EmpresaRepositorio ──► Empresa ─┬─► Usuario ─┬─► Documento, Email,
+      │                                       │            │   Telefone, Endereco
+      │                                       │            ├─► Credencial
+      │                                       │            └─► Veiculo
+      │                                       ├─► Mercadoria, Servico
+      │                                       └─► Venda (usuários, veículo, itens)
+      ├──► BuscadorUsuario   (empresa e usuário da rota)
+      ├──► *Atualizador      (atualização parcial)
+      └──► AdicionadorLink*  (HATEOAS)
 
 TratadorDeExcecoes ──► captura as exceções lançadas por qualquer controle
 ```
@@ -151,168 +156,149 @@ TratadorDeExcecoes ──► captura as exceções lançadas por qualquer contro
 ## 🖥 Estrutura de funcionamento da API
 
 ``` bash
-/cliente
-├── GET     /lista
-├── GET     /{id}
-├── POST    /cadastro
-├── PUT     /atualizar
-├── DELETE  /excluir
-└── /{clienteId}
-      ├── /telefone   → GET (lista) · GET /{id} · POST · PUT /{id} · DELETE /{id}
-      ├── /documento  → GET (lista) · GET /{id} · POST · PUT /{id} · DELETE /{id}
-      └── /endereco   → GET · PUT
+/empresa
+├── GET /lista · GET /{id} · POST /cadastro · PUT /atualizar · DELETE /excluir
+└── /{empresaId}
+      ├── /telefone            → CRUD
+      ├── /endereco            → GET · PUT
+      ├── /mercadoria          → CRUD
+      ├── /servico             → CRUD
+      ├── /venda               → CRUD
+      └── /usuario             → CRUD
+            └── /{usuarioId}
+                  ├── /telefone, /documento, /email → CRUD
+                  ├── /credencial, /veiculo         → CRUD
+                  ├── /endereco                     → GET · PUT
+                  └── /mercadoria                   → GET · PUT /{id} · DELETE /{id}
 ```
+
+CRUD = GET (lista), GET /{id}, POST, PUT /{id}, DELETE /{id}.
 
 ## 🗃 Modelo de dados
 
 ```
-Cliente 1 ── * Documento
+Empresa 1 ── * Usuario, Mercadoria, Servico, Venda, Telefone
         1 ── 1 Endereco
-        1 ── * Telefone
+Usuario 1 ── * Documento, Email, Telefone, Credencial, Veiculo
+        1 ── 1 Endereco
+        1 ── * Mercadoria (fornecedor)
+Venda   * ── 1 Usuario (cliente) e 1 Usuario (funcionário)
+        * ── 0..1 Veiculo
+        * ── * Mercadoria e * ── * Servico
 ```
 
-`Documento`, `Endereco` e `Telefone` pertencem sempre a um `Cliente` (agregado). O relacionamento usa `cascade = ALL` e `orphanRemoval = true`: salvar, atualizar ou remover o cliente propaga para as entidades filhas, e um item removido da lista é apagado do banco.
+Dados que pertencem a um dono usam `cascade = ALL` e `orphanRemoval = true`: remover da lista apaga do banco. `Venda` referencia usuários, veículo e itens sem cascade.
 
 ## 🏗 Decisão de arquitetura
 
-As entidades filhas não têm CRUD solto (por exemplo, `POST /telefone`), porque não têm referência ao cliente e um registro criado sozinho ficaria sem dono. O CRUD é **aninhado no cliente**, em rotas `/cliente/{clienteId}/...`. Toda rota valida primeiro o cliente e só depois procura a entidade filha dentro dele: um telefone ou documento de outro cliente devolve 404.
+- **Empresa é a raiz.** Todo recurso é acessado por rotas aninhadas. A rota valida a empresa e só depois procura o filho dentro dela: dados de outra empresa ou de outro usuário devolvem 404.
+- **`Cliente` virou `Usuario`**, com os perfis CLIENTE, FUNCIONARIO e FORNECEDOR.
+- **Listas no lugar de `Set`**, para manter os atualizadores (sincronização por `id`). `Usuario.vendas` e `Veiculo.vendas` foram removidos: as vendas já guardam cliente, funcionário e veículo.
+- **Venda** usa `@ManyToMany` para mercadorias e serviços (o mesmo item aparece em várias vendas) e `@ManyToOne` para o veículo. O corpo do `POST` e do `PUT` recebe **ids**; a resposta mostra cliente e funcionário resumidos.
+- **Credencial** é polimórfica: o campo `tipo` (`USUARIO_SENHA` ou `CODIGO_BARRA`) é obrigatório. A `senha` só entra, nunca sai.
+- **Veículo:** `proprietario` fica fora do JSON, para evitar ciclo Usuario → veiculos → proprietario.
 
 ## 🏛 Arquitetura
 
-O AutoBots adota **microsserviços** no back-end. O `automanager` é o microsserviço responsável pelo **cadastro de clientes** (com documentos, endereço e telefones). Ele tem uma única responsabilidade, roda como um processo independente (um `.jar` com Tomcat embutido) e tem o seu próprio banco de dados.
+O AutoBots adota **microsserviços** no back-end. O `automanager` cuida do cadastro de empresas e de tudo o que a operação de uma loja precisa. É um processo independente (`.jar` com Tomcat embutido), com banco próprio, sem estado de sessão, e se integra por HTTP/JSON com links HATEOAS.
 
-```
- Outros sistemas                         automanager (este serviço)
- (front-end, outros       HTTP / JSON    ┌──────────────────────────────┐
-  microsserviços,     ◄────────────────► │ controles   → recebem HTTP   │
-  parceiros)                             │ modelo      → regras         │
-                                         │ repositorios→ acesso a dados │
-                                         │ entidades   → JPA / H2       │
-                                         └──────────────────────────────┘
-```
+**Camadas:** `controles` expõem as rotas e traduzem exceções em respostas HTTP; `modelo` concentra as regras (atualizadores, buscador, links); `repositorios` isolam o acesso a dados; `entidades` representam o domínio.
 
-| Característica | Como aparece no projeto |
-|---|---|
-| Responsabilidade única | Apenas o cadastro de clientes e seus dados |
-| Execução independente | `./mvnw spring-boot:run` sobe o serviço sozinho, na porta 8080 |
-| Dados próprios | Banco H2 em memória, acessado só por este serviço |
-| Comunicação por HTTP/JSON | API REST; nenhum outro sistema acessa o banco diretamente |
-| Sem estado de sessão | Cada requisição é independente; o estado fica no banco |
-| Facilidade de integração | Rotas REST padronizadas e links HATEOAS (RMM nível 3), que permitem a quem consome descobrir as próximas ações pelas respostas |
+**Limites desta etapa:** banco em memória, sem autenticação, gateway ou comunicação com outros microsserviços.
 
-**Camadas internas:** `controles` expõem as rotas e traduzem exceções em respostas HTTP; `modelo` concentra as regras de negócio (atualizadores e selecionador, cada um com uma responsabilidade); `repositorios` isolam o acesso a dados; `entidades` representam o domínio.
-
-**Limites desta etapa:** o banco em memória serve ao desenvolvimento, porque os dados se perdem ao reiniciar. Também ainda não há autenticação, gateway nem comunicação com outros microsserviços.
-
-## 🔗 REST (RMM) e HATEOAS
+## 🔗 Maturidade REST (RMM) e HATEOAS
 
 | Nível | Característica | Situação |
 |---|---|---|
-| 0 | Um único endpoint e o protocolo HTTP apenas como transporte | Superado |
-| 1 | Recursos com URIs próprias (`/cliente/{id}/telefone/{id}`) | Atendido |
-| 2 | Verbos HTTP e códigos de status adequados (200, 201, 400, 404, 409) | Atendido |
-| 3 | HATEOAS: respostas trazem links para as próximas ações possíveis | Atendido (ATVII) |
+| 0 | Um endpoint, HTTP só como transporte | Superado |
+| 1 | Recursos com URIs próprias | Atendido |
+| 2 | Verbos e status HTTP adequados | Atendido |
+| 3 | HATEOAS: links para as próximas ações | Atendido |
 
-As respostas de `GET` e `POST` que devolvem corpo incluem o array `links`, com pares `rel` e `href`. O cliente da API navega pelos links, sem montar URLs por conta própria. `PUT` e `DELETE` respondem 200 sem corpo.
+As respostas de `GET` e `POST` com corpo trazem o array `links` (`rel` e `href`). `PUT` e `DELETE` respondem 200 sem corpo. Com `Accept: application/hal+json`, os links passam para `_links`.
 
 | Recurso | Relações (`rel`) |
 |---|---|
-| Cliente | `self`, `clientes`, `atualizar`, `excluir`, `telefones`, `documentos`, `endereco` |
-| Telefone | `self`, `telefones`, `cliente` |
-| Documento | `self`, `documentos`, `cliente` |
-| Endereço | `self`, `cliente` |
+| Empresa | `self`, `empresas`, `atualizar`, `excluir`, `telefones`, `endereco`, `usuarios`, `mercadorias`, `servicos`, `vendas` |
+| Usuário | `self`, `usuarios`, `empresa`, `telefones`, `documentos`, `emails`, `endereco`, `credenciais`, `veiculos`, `mercadorias` (fornecedor) |
+| Telefone, documento, e-mail, credencial, veículo | `self`, plural, `usuario` (telefone da empresa: `empresa`) |
+| Endereço | `self`, `usuario` ou `empresa` |
+| Mercadoria, serviço | `self`, plural, `empresa` |
+| Venda | `self`, `vendas`, `empresa`, `cliente`, `funcionario`, `veiculo` |
 
-Os links `atualizar` e `excluir` indicam a rota (`/cliente/atualizar` e `/cliente/excluir`). O verbo (`PUT` e `DELETE`) segue a documentação dos endpoints.
-
-Exemplo (`GET /cliente/1`, trecho):
-
-```json
-{
-  "id": 1,
-  "nome": "Pedro Alcântara de Bragança e Bourbon",
-  "telefones": [
-    {
-      "id": 1, "ddd": "21", "numero": "987654321",
-      "links": [
-        { "rel": "self", "href": "http://localhost:8080/cliente/1/telefone/1" },
-        { "rel": "telefones", "href": "http://localhost:8080/cliente/1/telefone" },
-        { "rel": "cliente", "href": "http://localhost:8080/cliente/1" }
-      ]
-    }
-  ],
-  "links": [
-    { "rel": "self", "href": "http://localhost:8080/cliente/1" },
-    { "rel": "clientes", "href": "http://localhost:8080/cliente/lista" },
-    { "rel": "telefones", "href": "http://localhost:8080/cliente/1/telefone" }
-  ]
-}
-```
-
-**Implementação:** as entidades estendem `RepresentationModel` (Spring HATEOAS, via `spring-boot-starter-hateoas`). A montagem dos links fica em classes do pacote `modelo` (`AdicionadorLinkCliente`, `AdicionadorLinkTelefone`, `AdicionadorLinkDocumento`, `AdicionadorLinkEndereco`), que usam `WebMvcLinkBuilder.linkTo(methodOn(...))`. Assim, os links acompanham as rotas dos controllers e não ficam como texto fixo.
-
-**Formato:** sem cabeçalho `Accept` específico, a resposta sai em JSON simples, com o array `links`. Com `Accept: application/hal+json`, os links passam para `_links` (formato HAL).
+**Implementação:** as entidades estendem `RepresentationModel`. As classes `AdicionadorLink*` (pacote `modelo`) usam `linkTo(methodOn(...))`, então os links acompanham as rotas dos controllers.
 
 ## 🔌 Endpoints
 
-### Cliente
+### Empresa (`/empresa`)
 
-| Método | Rota | Descrição | Respostas |
-|---|---|---|---|
-| GET | `/cliente/lista` | Lista todos os clientes | 200 |
-| GET | `/cliente/{id}` | Busca um cliente | 200, 404 |
-| POST | `/cliente/cadastro` | Cadastra cliente com documentos, endereço e telefones | 201, 400, 409 |
-| PUT | `/cliente/atualizar` | Atualização parcial (id no corpo) | 200, 400, 404, 409 |
-| DELETE | `/cliente/excluir` | Exclui cliente e filhos (id no corpo: `{"id": 1}`) | 200, 400, 404 |
+| Método | Rota | Respostas |
+|---|---|---|
+| GET | `/lista` | 200 |
+| GET | `/{id}` | 200, 404 |
+| POST | `/cadastro` | 201, 400 |
+| PUT | `/atualizar` (id no corpo) | 200, 400, 404 |
+| DELETE | `/excluir` (`{"id": 1}`) | 200, 400, 404 |
 
-**Regras do `PUT /cliente/atualizar`:**
-- Campos nulos ou em branco são ignorados (não sobrescrevem o valor atual).
-- Em `documentos` e `telefones`: item sem `id` é inserido; item com `id` é atualizado; item cujo `id` **não** aparece na lista enviada é removido.
-- Lista omitida ou vazia significa "sem alteração".
-- Um `id` que não pertence ao cliente é ignorado.
-- Não aplica `@Valid`; as validações de campos obrigatórios valem no cadastro.
+- No PUT, campos nulos ou em branco são ignorados. Em `telefones`, item sem `id` é inserido, com `id` é atualizado e o `id` ausente é removido. Lista omitida ou vazia = sem alteração.
+- Usuários, mercadorias, serviços e vendas são ignorados no cadastro e na atualização: têm rotas próprias.
+- Excluir a empresa apaga tudo o que pertence a ela, inclusive as vendas.
+- Telefones (CRUD) e endereço (GET e PUT) em `/empresa/{empresaId}/telefone` e `/endereco`.
 
-### Telefone (`/cliente/{clienteId}/telefone`)
+### Usuário (base `/empresa/{empresaId}/usuario`)
 
-| Método | Rota | Descrição | Respostas |
-|---|---|---|---|
-| GET | `/cliente/{clienteId}/telefone` | Lista telefones do cliente | 200, 404 |
-| GET | `/cliente/{clienteId}/telefone/{telefoneId}` | Busca um telefone | 200, 404 |
-| POST | `/cliente/{clienteId}/telefone` | Cadastra telefone | 201, 400, 404 |
-| PUT | `/cliente/{clienteId}/telefone/{telefoneId}` | Atualização parcial | 200, 404 |
-| DELETE | `/cliente/{clienteId}/telefone/{telefoneId}` | Remove telefone (pode remover o último) | 200, 404 |
+| Método | Rota | Respostas |
+|---|---|---|
+| GET | `` e `/{id}` | 200, 404 |
+| POST | `` | 201, 400, 404, 409 |
+| PUT | `/{id}` | 200, 404 |
+| DELETE | `/{id}` | 200, 404, 409 |
 
-### Documento (`/cliente/{clienteId}/documento`)
+- O PUT altera `nome`, `nomeSocial`, `perfis` (substitui, se enviado) e `endereco` (parcial). Os demais dados usam as rotas abaixo.
+- DELETE devolve 409 se o usuário aparece em alguma venda.
 
-| Método | Rota | Descrição | Respostas |
-|---|---|---|---|
-| GET | `/cliente/{clienteId}/documento` | Lista documentos do cliente | 200, 404 |
-| GET | `/cliente/{clienteId}/documento/{documentoId}` | Busca um documento | 200, 404 |
-| POST | `/cliente/{clienteId}/documento` | Cadastra documento | 201, 400, 404, 409 |
-| PUT | `/cliente/{clienteId}/documento/{documentoId}` | Atualização parcial | 200, 404, 409 |
-| DELETE | `/cliente/{clienteId}/documento/{documentoId}` | Remove documento | 200, 404, 409 |
+### Dados do usuário (base `/empresa/{empresaId}/usuario/{usuarioId}`)
 
-O `DELETE` do último documento devolve 409: todo cliente precisa ter ao menos um documento.
+| Recurso | Rotas | Observação |
+|---|---|---|
+| `/telefone` | CRUD | |
+| `/documento` | CRUD | o último documento não pode ser removido (409) |
+| `/email` | CRUD | |
+| `/credencial` | CRUD | `tipo` obrigatório; PUT não troca o tipo (400) |
+| `/veiculo` | CRUD | DELETE → 409 se consta em venda |
+| `/endereco` | GET, PUT | |
+| `/mercadoria` | GET; PUT e DELETE `/{id}` | vínculo do fornecedor |
 
-### Endereço (`/cliente/{clienteId}/endereco`)
+- **Vínculo:** só usuário com perfil FORNECEDOR (409). Mercadoria já ligada a outro fornecedor → 409. Desvincular não apaga a mercadoria.
+- **Credencial:** `criacao` e `ultimoAcesso` são controlados pelo servidor; `nomeUsuario` e `codigo` são únicos (409).
 
-| Método | Rota | Descrição | Respostas |
-|---|---|---|---|
-| GET | `/cliente/{clienteId}/endereco` | Busca o endereço do cliente | 200, 404 |
-| PUT | `/cliente/{clienteId}/endereco` | Atualização parcial | 200, 404 |
+### Mercadoria e serviço (`/empresa/{empresaId}/mercadoria` e `/servico`)
+CRUD completo. `DELETE` de item que consta em venda → 409. Excluir uma mercadoria remove antes o vínculo com o fornecedor.
 
-O endereço é obrigatório e 1:1 com o cliente. Por isso não há `POST` (ele é criado no cadastro do cliente) nem `DELETE` isolado (deixaria o cliente inválido; ele é removido junto com o cliente).
+### Venda (`/empresa/{empresaId}/venda`)
+CRUD completo. O corpo recebe ids: `identificacao`, `clienteId`, `funcionarioId`, `veiculoId`, `mercadoriaIds`, `servicoIds`.
+- Cliente com perfil CLIENTE e funcionário com perfil FUNCIONARIO (senão 409).
+- Veículo do cliente e demais ids da própria empresa (senão 404).
+- Ao menos uma mercadoria ou serviço (senão 409). `identificacao` única (409).
+- No PUT, campo omitido = sem alteração; lista enviada substitui a anterior; `clienteId` é ignorado.
 
 ## ✅ Validações (cadastro)
 
-| Entidade | Campo | Regra |
-|---|---|---|
-| Cliente | `nome` | obrigatório |
-| Cliente | `dataNascimento` | obrigatória (formato `yyyy-MM-dd`) |
-| Cliente | `documentos` | ao menos 1 |
-| Cliente | `endereco` | obrigatório |
-| Documento | `tipo`, `numero` | obrigatórios; `numero` único |
-| Endereço | `rua`, `numero`, `cidade` | obrigatórios |
-| Telefone | `ddd`, `numero` | obrigatórios |
+| Entidade | Regra |
+|---|---|
+| Empresa | `razaoSocial` e `endereco` obrigatórios |
+| Usuário | `nome`, `endereco`, ao menos 1 perfil e 1 documento |
+| Documento | `tipo` (enum), `dataEmissao` e `numero` (único) |
+| E-mail | `endereco` obrigatório e válido |
+| Endereço | `rua`, `numero`, `cidade` |
+| Telefone | `ddd`, `numero` |
+| Credencial | usuário/senha: `nomeUsuario` (único) e `senha`; código de barra: `codigo` positivo (único) |
+| Mercadoria | `nome`, `quantidade` ≥ 0, `valor` ≥ 0 |
+| Serviço | `nome`, `valor` ≥ 0 |
+| Veículo | `tipo` (enum), `modelo`, `placa` |
+| Venda | `identificacao` (única), `clienteId`, `funcionarioId` |
+
+O PUT não aplica `@Valid`: as validações de campos obrigatórios valem no cadastro.
 
 ## ⚠️ Tratamento de erros
 
@@ -321,70 +307,99 @@ Todas as respostas de erro são JSON, tratadas em `TratadorDeExcecoes`.
 | Status | Situação | Corpo |
 |---|---|---|
 | 400 | Falha de validação | `{ "campo": "mensagem" }` |
-| 400 | JSON malformado | `{ "erro": "Corpo da requisição inválido ou malformado" }` |
-| 400 | `id` ausente no PUT/DELETE de cliente | `{ "erro": "Id do cliente é obrigatório" }` |
-| 404 | Cliente, telefone ou documento não encontrado | `{ "erro": "Cliente não encontrado: id 999" }` |
-| 405 | Método HTTP não permitido para a rota | `{ "erro": "Método HTTP não permitido para esta rota" }` |
-| 409 | Número de documento duplicado | `{ "erro": "Dado duplicado ou inválido (ex: número de documento já cadastrado)" }` |
-| 409 | Remoção do último documento | `{ "erro": "Cliente precisa ter ao menos um documento" }` |
+| 400 | JSON malformado, enum ou `tipo` de credencial inválido | `{ "erro": "Corpo da requisição inválido ou malformado" }` |
+| 400 | `id` ausente no PUT/DELETE de empresa | `{ "erro": "Id é obrigatório" }` |
+| 400 | PUT trocando o tipo da credencial | `{ "erro": "O tipo da credencial não pode ser alterado" }` |
+| 404 | Recurso não encontrado (ou de outro dono) | `{ "erro": "Empresa não encontrada: id 999" }` |
+| 405 | Método HTTP não permitido | `{ "erro": "Método HTTP não permitido para esta rota" }` |
+| 409 | Valor único repetido (documento, venda, credencial) | `{ "erro": "Dado duplicado ou inválido (...)" }` |
+| 409 | Último documento, usuário com vendas, item em venda, perfil incorreto, venda vazia | `{ "erro": "<regra violada>" }` |
 | 415 | Content-Type diferente de `application/json` | `{ "erro": "Tipo de conteúdo não suportado: use application/json" }` |
 | 500 | Erro não previsto | `{ "erro": "Erro inesperado no servidor" }` |
 
 ## 📨 Exemplos
 
-Cadastro de cliente:
+Cadastro de usuário:
 
 ```http
-POST /cliente/cadastro
+POST /empresa/1/usuario
 Content-Type: application/json
 
 {
   "nome": "Maria Souza",
-  "dataNascimento": "1990-05-20",
-  "documentos": [{ "tipo": "CPF", "numero": "11122233344" }],
-  "telefones": [{ "ddd": "12", "numero": "911112222" }],
+  "perfis": ["CLIENTE"],
+  "documentos": [{ "tipo": "CPF", "numero": "11122233344", "dataEmissao": "2020-01-10" }],
+  "emails": [{ "endereco": "maria@teste.com" }],
   "endereco": { "rua": "Rua A", "numero": "10", "cidade": "São José dos Campos" }
 }
 ```
 
-Remoção de um telefone específico:
+Credencial de usuário e senha:
 
 ```http
-DELETE /cliente/1/telefone/2
+POST /empresa/1/usuario/1/credencial
+
+{ "tipo": "USUARIO_SENHA", "nomeUsuario": "maria", "senha": "abc123" }
+```
+
+Venda, por ids:
+
+```http
+POST /empresa/1/venda
+
+{
+  "identificacao": "V-100",
+  "clienteId": 3,
+  "funcionarioId": 1,
+  "veiculoId": 1,
+  "mercadoriaIds": [1],
+  "servicoIds": [1, 2]
+}
 ```
 
 ## 🧪 Testes
 
-Os testes foram executados manualmente contra a API em execução, uma requisição por vez, conferindo status e corpo da resposta. O roteiro completo (passos, corpo de cada requisição, resultado esperado e obtido) está em [docs/testes.md](docs/testes.md).
+Testes manuais contra a API em execução, uma requisição por vez, conferindo status e corpo.
+
+- **ATV.III:** T34 a T108b em [docs/testes.md](docs/testes.md). Todos aprovados.
+- **ATV.I e ATV.II:** T01 a T33 (cliente) em [docs/testes-atvii.md](docs/testes-atvii.md), válidos para a tag `atvii-entrega`.
 
 | Grupo | Cobertura |
 |---|---|
-| Cliente | Cadastro e validações, atualização parcial com sincronização de listas, exclusão com cascade |
-| Telefone | POST, GET, PUT, DELETE e isolamento entre clientes |
-| Documento | POST, GET, PUT, DELETE, número duplicado e bloqueio do último documento |
-| Endereço | GET e PUT parcial |
-| HATEOAS | Links em GET/POST, navegação pelos links, links por cliente dono |
+| Empresa | CRUD, telefones, endereço e links |
+| Usuário | CRUD, filhos, regras de exclusão e isolamento |
+| Credencial | Polimorfismo, senha oculta, unicidade |
+| Mercadoria, serviço, veículo | CRUD, vínculo do fornecedor, exclusão com vendas |
+| Venda | Validação por perfil, itens, veículo e links |
 
 ## 🖥 Compatibilidade
 
 | Sistema | Situação |
 |---|---|
-| Windows (desenvolvimento) | Roteiro completo, testes 1 a 31 |
-| Ubuntu 24.04 (WSL2) | Build com `./mvnw clean package` e amostra dos testes (T01, T08, T13, T18, T26, T29, T30 e regra do último documento). Detalhes em [docs/testes.md](docs/testes.md) |
+| Windows (desenvolvimento) | Testes T34 a T108b |
+| Ubuntu 24.04 (WSL2) | Verificado na ATV.II; não repetido na ATV.III |
 
-O `mvnw` é versionado com permissão de execução e quebra de linha LF (`.gitattributes`), o que permite rodar no Linux logo após o clone. No Ubuntu basta ter o Java 17 e o Git.
+O `mvnw` é versionado com permissão de execução e quebra de linha LF (`.gitattributes`). No Linux basta ter o Java 17 e o Git.
 
 ## 💾 Persistência de dados
 
-Os dados ficam no banco **H2 em memória**, com a configuração padrão do Spring Boot (não há `application.properties` customizado). Eles são recriados a cada inicialização e populados pelo `Runner`. Não há arquivos de dados.
+Os dados ficam no banco **H2 em memória**: são recriados a cada inicialização e populados pelo `Runner`. O `application.properties` desliga só a validação feita pelo JPA na gravação (`spring.jpa.properties.javax.persistence.validation.mode=none`). Motivo: no `merge` de entidade nova, o Hibernate grava primeiro uma cópia com as coleções vazias, e `@NotEmpty` falharia. A validação (`@Valid`) continua ativa nos controllers.
+
+## 🚧 Limitações conhecidas
+
+- **Senha** gravada em texto puro (não é devolvida nas respostas). Hash e autenticação ficam para a atividade de segurança (JWT).
+- Sem autenticação, autorização ou gateway.
+- Sem baixa de estoque ao vender e sem total da venda.
+- Banco em memória.
+- O erro 409 de valor único repetido usa a mesma mensagem para qualquer campo.
+- `GET /empresa/{id}` devolve a empresa inteira, sem paginação.
 
 ## 🎯 Conceitos aplicados
 
-- Java 17 e Programação Orientada a Objetos
-- Spring Boot e API REST (verbos HTTP e códigos de status)
-- JPA/Hibernate: `@OneToMany`, `@OneToOne`, `cascade` e `orphanRemoval`
-- Bean Validation com mensagens personalizadas
-- Tratamento centralizado de exceções (`@RestControllerAdvice`)
-- Padrões de projeto e SOLID: regras de negócio em classes separadas (`*Atualizador`, `ClienteSelecionador`)
-- Agregado: entidades filhas acessadas apenas por meio do cliente
+- Java 17, POO, Spring Boot e API REST (verbos e status HTTP)
+- JPA/Hibernate: `@OneToMany`, `@ManyToMany`, herança `JOINED`, `cascade` e `orphanRemoval`
+- Bean Validation e tratamento centralizado de exceções (`@RestControllerAdvice`)
+- HATEOAS (RMM nível 3) com `linkTo(methodOn(...))`
+- Padrões de projeto e SOLID: regras em classes separadas (`*Atualizador`, `BuscadorUsuario`, `AdicionadorLink*`)
+- Agregado: dados acessados apenas por meio do dono
 - Arquitetura de microsserviços

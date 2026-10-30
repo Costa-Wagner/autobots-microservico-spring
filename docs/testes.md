@@ -1,478 +1,68 @@
-# 🧪 Roteiro de testes — AutoBots Automanager
+# 🧪 Roteiro de testes — ATV.III (AutoBots Automanager)
 
-Testes manuais da API com a aplicação em execução (`http://localhost:8080`), um passo por vez, conferindo status e corpo da resposta. Todos os testes executados no ambiente de desenvolvimento foram aprovados.
+Testes manuais com a aplicação em execução (`http://localhost:8080`), uma requisição por vez, conferindo status e corpo. Os testes da ATV.I e ATV.II (T01 a T33, sobre `Cliente`) estão em [testes-atvii.md](testes-atvii.md). A numeração da ATV.III continua em T34.
 
 ## Ambiente
-
-| Ambiente | Ferramenta | Situação |
-|---|---|---|
-| Windows (desenvolvimento) | Cliente HTTP (Thunder Client ou similar) | Testes 1 a 33 aprovados |
-| Ubuntu 24.04 (WSL2) | Cliente HTTP, `./mvnw` | Build e amostra aprovados (ver seção abaixo) |
-
-A coleção de requisições está em [`autobots-automanager.postman_collection.json`](autobots-automanager.postman_collection.json) no formato Postman v2.1, importável no Thunder Client, Postman ou Insomnia.
+- Windows, VS Code, Thunder Client (Body → JSON), `./mvnw clean spring-boot:run`.
+- Ubuntu: não repetido nesta atividade.
+- Onde consta **reiniciar**, os dados voltam ao estado do Runner. Ids de filhos podem variar entre execuções: conferir pelo GET.
 
 ## Dados iniciais (Runner)
-
-Ao subir a aplicação, o cliente 1 é criado com:
-
-| Item | Valores |
-|---|---|
-| Cliente | id 1, Pedro Alcântara de Bragança e Bourbon, nome social Dom Pedro I |
-| Documentos | id 1 (RG 123456789) e id 2 (CPF 12345678900) |
-| Telefone | id 1 (21 987654321) |
-| Endereço | id 1 (Av. Atlântica, 1702, Copacabana, Rio de Janeiro, CEP 22021001) |
-
-Os testes dependem desses ids e da ordem. Onde consta **Reiniciar**, os dados voltam ao estado acima.
-
-## Execução no Ubuntu 24.04
-
-Ambiente: WSL2 com Ubuntu 24.04, OpenJDK 17.0.20 e Maven Wrapper (sem Maven instalado). O projeto foi clonado do GitHub para o sistema de arquivos do Linux, que diferencia maiúsculas e minúsculas.
-
-| Verificação | Resultado |
-|---|---|
-| `git clone` do repositório | Concluído |
-| Permissão de execução do `mvnw` | `-rwxr-xr-x` |
-| Quebras de linha do Windows no `mvnw` | Nenhuma (`grep -c $'\r' mvnw` = 0) |
-| `./mvnw clean package` | BUILD SUCCESS (`Tests run: 1, Failures: 0, Errors: 0`) |
-| `./mvnw spring-boot:run` | Aplicação iniciada na porta 8080 |
-
-Testes executados, escolhidos por dependerem de JPA, banco e codificação de caracteres: T01, T08, T13, T18, T26, T29, T30 e a regra do último documento (passos 1, 5 e 6 do T21, com estado próprio). Os demais foram executados apenas no Windows: a lógica é a mesma, na mesma JVM e sobre o mesmo H2 em memória.
+- Empresa 1: Car service toyota ltda.
+- Usuários: 1 funcionário, 2 fornecedor, 3 cliente.
+- Credenciais 1, 2 e 3 (uma por usuário); veículo 1 (do usuário 3).
+- Mercadoria 1; serviços 1 e 2; vendas 1 e 2.
 
 ## Resumo
-
-Ubuntu: "—" indica que o teste não foi repetido nesse sistema.
-
-| Teste | Grupo | Descrição | Windows | Ubuntu |
-|---|---|---|---|---|
-| 1 | Cliente | PUT: atualizar, inserir e preservar | Aprovado | Aprovado |
-| 2 | Cliente | PUT: remover documento omitindo o id | Aprovado | — |
-| 3 | Cliente | PUT: número de documento duplicado | Aprovado | — |
-| 4 | Cliente | PUT: campo omitido não apaga listas | Aprovado | — |
-| 5 | Cliente | PUT: telefone com id que não pertence ao cliente | Aprovado | — |
-| 6 | Cliente | PUT: cliente inexistente | Aprovado | — |
-| 7 | Cliente | PUT: endereço parcial pelo cliente | Aprovado | — |
-| 8 | Cliente | DELETE: excluir cliente e conferir cascade | Aprovado | Aprovado |
-| 9 | Cliente | DELETE: cliente inexistente | Aprovado | — |
-| 10 | Cliente | DELETE: corpo sem id (antes do ajuste) | Aprovado | — |
-| 11 | Cliente | DELETE: corpo sem id (após o ajuste) | Aprovado | — |
-| 12 | Cliente | PUT: corpo sem id | Aprovado | — |
-| 13 | Telefone | POST de telefone | Aprovado | Aprovado |
-| 14 | Telefone | GET por id e 404 | Aprovado | — |
-| 15 | Telefone | PUT de telefone (parcial) | Aprovado | — |
-| 16 | Telefone | DELETE de telefone | Aprovado | — |
-| 17 | Telefone | Isolamento entre clientes | Aprovado | — |
-| 18 | Documento | POST de documento | Aprovado | Aprovado |
-| 19 | Documento | GET por id e 404 | Aprovado | — |
-| 20 | Documento | PUT de documento (parcial) | Aprovado | — |
-| 21 | Documento | DELETE de documento e bloqueio do último | Aprovado | Aprovado |
-| 22 | Endereço | GET de endereço | Aprovado | — |
-| 23 | Endereço | PUT de endereço (parcial) | Aprovado | — |
-| 24 | Cliente | POST: validação aninhada (sem cidade) | Aprovado | — |
-| 25 | Cliente | POST: cadastro completo e dataCadastro | Aprovado | — |
-| 26 | HATEOAS | GET cliente com links | Aprovado | Aprovado |
-| 27 | HATEOAS | Navegação pelos links | Aprovado | — |
-| 28 | HATEOAS | GET lista com links | Aprovado | — |
-| 29 | HATEOAS | POST de filho devolve links | Aprovado | Aprovado |
-| 30 | HATEOAS | POST de cliente devolve links | Aprovado | Aprovado |
-| 31 | HATEOAS | Links respeitam o cliente dono | Aprovado | — |
-| 32 | Erros | Método HTTP não permitido (405) | Aprovado | — |
-| 33 | Erros | Content-Type não suportado (415) | Aprovado | — |
-
-## Teste 1 — PUT: atualizar, inserir e preservar
-
-**Grupo:** Cliente · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/1` | — | 200. Documentos 1 e 2 e telefone 1 existentes. |
-| 2 | `PUT /cliente/atualizar` | `{"id": 1, "nome": "Teste", "telefones": [{"id": 1, "numero": "111"}, {"ddd": "11", "numero": "222"}], "documentos": [{"id": 1}, {"id": 2}]}` | 200 sem corpo. |
-| 3 | `GET /cliente/1` | — | nome "Teste"; telefone 1 com ddd "21" e numero "111"; novo telefone id 2 (11/222); documentos 1 e 2 inalterados. |
-
-**Resultado:** Aprovado
-
-## Teste 2 — PUT: remover documento omitindo o id
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/atualizar` | `{"id": 1, "telefones": [{"id": 1}, {"id": 2}], "documentos": [{"id": 1}]}` | 200 sem corpo. |
-| 2 | `GET /cliente/1` | — | Documento 2 removido; documento 1 e telefones 1 e 2 intactos. |
-
-**Resultado:** Aprovado
-
-## Teste 3 — PUT: número de documento duplicado
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/atualizar` | `{"id": 1, "telefones": [{"id": 1}, {"id": 2}], "documentos": [{"id": 1}, {"tipo": "CPF", "numero": "123456789"}]}` | 409 {"erro": "Dado duplicado ou inválido (ex: número de documento já cadastrado)"}. |
-| 2 | `GET /cliente/1` | — | Documentos continuam só com o 1 (CPF novo não gravado). |
-
-**Resultado:** Aprovado
-
-## Teste 4 — PUT: campo omitido não apaga listas
-
-**Grupo:** Cliente · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner). Exige o ajuste de lista vazia nos atualizadores.
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/1` | — | Anotar documentos e telefones. |
-| 2 | `PUT /cliente/atualizar` | `{"id": 1, "nome": "Teste 4"}` | 200 sem corpo. |
-| 3 | `GET /cliente/1` | — | nome "Teste 4"; documentos e telefones idênticos ao primeiro GET. |
-
-**Resultado:** Aprovado
-
-## Teste 5 — PUT: telefone com id que não pertence ao cliente
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/atualizar` | `{"id": 1, "telefones": [{"id": 1}, {"id": 999, "numero": "000"}]}` | 200 sem erro. |
-| 2 | `GET /cliente/1` | — | Telefone 1 intacto; nenhum telefone com id 999 ou número 000. |
-
-**Resultado:** Aprovado
-
-## Teste 6 — PUT: cliente inexistente
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/atualizar` | `{"id": 999, "nome": "Inexistente"}` | 404 {"erro": "Cliente não encontrado: id 999"} |
-
-**Resultado:** Aprovado
-
-## Teste 7 — PUT: endereço parcial pelo cliente
-
-**Grupo:** Cliente · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner). Exige o ajuste do codigoPostal no EnderecoAtualizador.
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/1` | — | Documento 2 com tipo "CPF"; anotar o endereço. |
-| 2 | `PUT /cliente/atualizar` | `{"id": 1, "endereco": {"rua": "Rua Nova", "codigoPostal": "11111000"}}` | 200 sem corpo. |
-| 3 | `GET /cliente/1` | — | rua "Rua Nova" e codigoPostal "11111000"; demais campos do endereço, documentos e telefones inalterados. |
-
-**Resultado:** Aprovado
-
-## Teste 8 — DELETE: excluir cliente e conferir cascade
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/cadastro` | `{"nome": "Cliente Delete", "dataNascimento": "2000-01-01", "documentos": [{"tipo": "CPF", "numero": "999888777"}], "telefones": [{"ddd": "12", "numero": "911112222"}], "endereco": {"rua": "Rua A", "numero": "10", "cidade": "Sao Jose dos Campos"}}` | 201 com o cliente no corpo. Anotar o id (usado no passo 2; aqui 2). |
-| 2 | `DELETE /cliente/excluir` | `{"id": 2}` | 200 sem corpo. |
-| 3 | `GET /cliente/2` | — | 404 {"erro": "Cliente não encontrado: id 2"}. |
-| 4 | `POST /cliente/cadastro` | `{"nome": "Cliente Delete", "dataNascimento": "2000-01-01", "documentos": [{"tipo": "CPF", "numero": "999888777"}], "telefones": [{"ddd": "12", "numero": "911112222"}], "endereco": {"rua": "Rua A", "numero": "10", "cidade": "Sao Jose dos Campos"}}` | 201. O número 999888777 é único: o 201 prova que o documento foi apagado do banco. |
-| 5 | `GET /cliente/lista` | — | Cliente 1 e o novo cliente, sem o excluído repetido. |
-
-**Resultado:** Aprovado
-
-## Teste 9 — DELETE: cliente inexistente
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `DELETE /cliente/excluir` | `{"id": 999}` | 404 {"erro": "Cliente não encontrado: id 999"} |
-| 2 | `GET /cliente/lista` | — | Lista igual à anterior; nada apagado. |
-
-**Resultado:** Aprovado
-
-## Teste 10 — DELETE: corpo sem id (antes do ajuste)
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior). Executado antes da criação de IdNaoInformadoException.
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `DELETE /cliente/excluir` | `{}` | 500 {"erro": "Erro inesperado no servidor"} (findById(null)). |
-| 2 | `DELETE /cliente/excluir` | `{"nome": "qualquer"}` | 500, mesmo resultado. |
-| 3 | `GET /cliente/lista` | — | Nenhum cliente apagado. Este resultado motivou o ajuste dos testes 11 e 12. |
-
-**Resultado:** Aprovado
-
-## Teste 11 — DELETE: corpo sem id (após o ajuste)
-
-**Grupo:** Cliente · **Pré-condição:** Reiniciar a aplicação com IdNaoInformadoException e o handler aplicados.
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `DELETE /cliente/excluir` | `{}` | 400 {"erro": "Id do cliente é obrigatório"}. |
-| 2 | `GET /cliente/lista` | — | Nenhum cliente apagado. |
-
-**Resultado:** Aprovado
-
-## Teste 12 — PUT: corpo sem id
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/atualizar` | `{"nome": "Sem id"}` | 400 {"erro": "Id do cliente é obrigatório"}. |
-| 2 | `GET /cliente/1` | — | Nome continua "Pedro Alcântara de Bragança e Bourbon". |
-
-**Resultado:** Aprovado
-
-## Teste 13 — POST de telefone
-
-**Grupo:** Telefone · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/1/telefone` | `{}` | 400 {"ddd": "DDD é obrigatório", "numero": "Número é obrigatório"} (ordem dos campos livre). |
-| 2 | `POST /cliente/1/telefone` | `{"ddd": "11", "numero": "222"}` | 201 com o telefone no corpo, id 2. |
-| 3 | `GET /cliente/1/telefone` | — | Telefones 1 e 2, nenhum vazio. |
-
-**Resultado:** Aprovado
-
-## Teste 14 — GET por id e 404
-
-**Grupo:** Telefone · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/1/telefone/2` | — | 200 {"id": 2, "ddd": "11", "numero": "222"}. |
-| 2 | `GET /cliente/1/telefone/999` | — | 404 {"erro": "Telefone não encontrado: id 999"}. |
-| 3 | `GET /cliente/999/telefone/1` | — | 404 {"erro": "Cliente não encontrado: id 999"} |
-
-**Resultado:** Aprovado
-
-## Teste 15 — PUT de telefone (parcial)
-
-**Grupo:** Telefone · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/1/telefone/2` | `{"numero": "333"}` | 200 sem corpo. |
-| 2 | `GET /cliente/1/telefone/2` | — | {"id": 2, "ddd": "11", "numero": "333"}. |
-| 3 | `PUT /cliente/1/telefone/2` | `{}` | 200; um GET seguinte mostra o telefone inalterado. |
-| 4 | `PUT /cliente/1/telefone/999` | `{"numero": "1"}` | 404 {"erro": "Telefone não encontrado: id 999"}. |
-
-**Resultado:** Aprovado
-
-## Teste 16 — DELETE de telefone
-
-**Grupo:** Telefone · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `DELETE /cliente/1/telefone/2` | — | 200 sem corpo. |
-| 2 | `GET /cliente/1/telefone` | — | Só o telefone 1. |
-| 3 | `DELETE /cliente/1/telefone/2` | — | 404 {"erro": "Telefone não encontrado: id 2"}. |
-| 4 | `DELETE /cliente/1/telefone/1` | — | 200 (remover o último é permitido). |
-| 5 | `GET /cliente/1/telefone` | — | [] |
-| 6 | `GET /cliente/1` | — | Cliente existe com telefones []; documentos e endereço intactos. |
-
-**Resultado:** Aprovado
-
-## Teste 17 — Isolamento entre clientes
-
-**Grupo:** Telefone · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/cadastro` | `{"nome": "Cliente Isolamento", "dataNascimento": "2000-01-01", "documentos": [{"tipo": "CPF", "numero": "555444333"}], "telefones": [{"ddd": "12", "numero": "911112222"}], "endereco": {"rua": "Rua B", "numero": "20", "cidade": "Sao Jose dos Campos"}}` | 201. Cliente 2 com telefone 3 (anotar os ids). |
-| 2 | `GET /cliente/1/telefone/3` | — | 404 {"erro": "Telefone não encontrado: id 3"}. |
-| 3 | `PUT /cliente/1/telefone/3` | `{"numero": "000"}` | 404. |
-| 4 | `DELETE /cliente/1/telefone/3` | — | 404. |
-| 5 | `GET /cliente/2/telefone/3` | — | 200 {"id": 3, "ddd": "12", "numero": "911112222"}; não alterado nem apagado. |
-
-**Resultado:** Aprovado
-
-## Teste 18 — POST de documento
-
-**Grupo:** Documento · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/1/documento` | `{}` | 400 {"tipo": "Tipo é obrigatório", "numero": "Número é obrigatório"} (ordem livre). |
-| 2 | `POST /cliente/1/documento` | `{"tipo": "CNH", "numero": "123456789"}` | 409 (número já existente). |
-| 3 | `POST /cliente/1/documento` | `{"tipo": "CNH", "numero": "111222333"}` | 201 com o documento no corpo. Anotar o id (3 ou 4). |
-| 4 | `GET /cliente/1/documento` | — | Documentos 1, 2 e o novo, sem vazios nem duplicados. |
-
-**Resultado:** Aprovado
-
-## Teste 19 — GET por id e 404
-
-**Grupo:** Documento · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/1/documento/2` | — | 200 {"id": 2, "tipo": "CPF", "numero": "12345678900"}. |
-| 2 | `GET /cliente/1/documento/999` | — | 404 {"erro": "Documento não encontrado: id 999"}. |
-| 3 | `GET /cliente/999/documento/1` | — | 404 {"erro": "Cliente não encontrado: id 999"} |
-
-**Resultado:** Aprovado
-
-## Teste 20 — PUT de documento (parcial)
-
-**Grupo:** Documento · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/1/documento/2` | `{"numero": "98765432100"}` | 200 sem corpo. |
-| 2 | `GET /cliente/1/documento/2` | — | {"id": 2, "tipo": "CPF", "numero": "98765432100"}. |
-| 3 | `PUT /cliente/1/documento/2` | `{}` | 200; documento inalterado. |
-| 4 | `PUT /cliente/1/documento/2` | `{"numero": "123456789"}` | 409 (número do documento 1). Um GET seguinte mantém 98765432100. |
-| 5 | `PUT /cliente/1/documento/999` | `{"numero": "1"}` | 404 {"erro": "Documento não encontrado: id 999"}. |
-
-**Resultado:** Aprovado
-
-## Teste 21 — DELETE de documento e bloqueio do último
-
-**Grupo:** Documento · **Pré-condição:** Não reiniciar (usa o estado do teste anterior). Passo 4 usa o id do CNH criado no teste 18 (aqui 3).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `DELETE /cliente/1/documento/2` | — | 200 sem corpo. |
-| 2 | `GET /cliente/1/documento` | — | Só o documento 1 e o CNH. |
-| 3 | `DELETE /cliente/1/documento/2` | — | 404 {"erro": "Documento não encontrado: id 2"}. |
-| 4 | `DELETE /cliente/1/documento/3` | — | 200. Restam só o documento 1. |
-| 5 | `DELETE /cliente/1/documento/1` | — | 409 {"erro": "Cliente precisa ter ao menos um documento"}. |
-| 6 | `GET /cliente/1/documento` | — | Documento 1 continua. |
-| 7 | `POST /cliente/1/documento` | `{"tipo": "CPF", "numero": "98765432100"}` | 201. O número era do documento 2 apagado: prova que a linha saiu do banco. |
-
-**Resultado:** Aprovado
-
-## Teste 22 — GET de endereço
-
-**Grupo:** Endereço · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/1/endereco` | — | 200 com o endereço do Runner, id 1. |
-| 2 | `GET /cliente/999/endereco` | — | 404 {"erro": "Cliente não encontrado: id 999"} |
-
-**Resultado:** Aprovado
-
-## Teste 23 — PUT de endereço (parcial)
-
-**Grupo:** Endereço · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/1/endereco` | `{"rua": "Rua Nova", "codigoPostal": "11111000"}` | 200 sem corpo. |
-| 2 | `GET /cliente/1/endereco` | — | rua "Rua Nova" e codigoPostal "11111000"; demais campos como no Runner. |
-| 3 | `PUT /cliente/1/endereco` | `{}` | 200; endereço inalterado. |
-| 4 | `PUT /cliente/1/endereco` | `{"cidade": "   "}` | 200; cidade continua "Rio de Janeiro". |
-| 5 | `PUT /cliente/1/endereco` | `{"id": 50, "rua": "Rua Id"}` | 200; rua "Rua Id" e id do endereço continua 1. |
-| 6 | `PUT /cliente/999/endereco` | `{"rua": "X"}` | 404 {"erro": "Cliente não encontrado: id 999"} |
-| 7 | `GET /cliente/1` | — | Endereço igual ao do passo 5; documentos e telefones intactos. |
-
-**Resultado:** Aprovado
-
-## Teste 24 — POST: validação aninhada (sem cidade)
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/cadastro` | `{"nome": "Teste", "nomeSocial": "", "dataNascimento": "1980-11-11", "documentos": [{"tipo": "RG", "numero": "987321"}], "endereco": {"rua": "Rua 1", "numero": "100"}, "telefones": [{"ddd": "21", "numero": "987654321"}]}` | 400 {"endereco.cidade": "Cidade é obrigatória"}. |
-
-**Resultado:** Aprovado
-
-## Teste 25 — POST: cadastro completo e dataCadastro
-
-**Grupo:** Cliente · **Pré-condição:** Não reiniciar (usa o estado do teste anterior). Exige setDataCadastro no ClienteControle.
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/cadastro` | `{"nome": "Teste", "nomeSocial": "", "dataNascimento": "1980-11-11", "documentos": [{"tipo": "RG", "numero": "987321"}], "endereco": {"rua": "Rua 1", "numero": "100", "cidade": "Rio de Janeiro"}, "telefones": [{"ddd": "21", "numero": "987654321"}]}` | 201 com dataCadastro preenchida (data atual). |
-| 2 | `GET /cliente/lista` | — | O novo cliente aparece com dataCadastro diferente de null. |
-
-**Resultado:** Aprovado
-
-## Teste 26 — GET cliente com links (RMM 3)
-
-**Grupo:** HATEOAS · **Pré-condição:** Reiniciar a aplicação (volta ao estado do Runner).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/1` | — | 200. `links` do cliente com `self`, `clientes`, `atualizar`, `excluir`, `telefones`, `documentos` e `endereco`. |
-| 2 | (mesma resposta) | — | Cada documento e cada telefone com `links` `self`, plural (`documentos`/`telefones`) e `cliente`. |
-| 3 | (mesma resposta) | — | `endereco.links` com `self` e `cliente`. |
-
-**Resultado:** Aprovado
-
-## Teste 27 — Navegação pelos links
-
-**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET` no `href` de `telefones` | — | 200 com a lista de telefones, cada um com `links`. |
-| 2 | `GET` no `href` de `documentos` | — | 200 com a lista de documentos, cada um com `links`. |
-| 3 | `GET` no `href` de `endereco` | — | 200 com o endereço e `links`. |
-| 4 | `GET` no `href` de `cliente` de um telefone | — | 200 com o cliente 1. |
-| 5 | `GET` no `href` de `self` de um documento | — | 200 com o documento. |
-
-**Resultado:** Aprovado
-
-## Teste 28 — GET lista com links
-
-**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/lista` | — | 200. Cada cliente da lista com `links` (inclui `self`). |
-
-**Resultado:** Aprovado
-
-## Teste 29 — POST de filho devolve links
-
-**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/1/telefone` | `{"ddd": "11", "numero": "222"}` | 201 com o telefone (id 2) e `links` (`self` apontando para `/cliente/1/telefone/2`). |
-| 2 | `POST /cliente/1/documento` | `{"tipo": "CNH", "numero": "111222333"}` | 201 com o documento (id 3) e `links`. |
-
-**Resultado:** Aprovado
-
-## Teste 30 — POST de cliente devolve links
-
-**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/cadastro` | `{"nome": "Cliente Links", "dataNascimento": "2000-01-01", "documentos": [{"tipo": "CPF", "numero": "555444333"}], "telefones": [{"ddd": "12", "numero": "911112222"}], "endereco": {"rua": "Rua B", "numero": "20", "cidade": "Sao Jose dos Campos"}}` | 201 com o cliente (id 2) e `links`, inclusive nos filhos. Anotar o id do telefone (3). |
-
-**Resultado:** Aprovado
-
-## Teste 31 — Links respeitam o cliente dono
-
-**Grupo:** HATEOAS · **Pré-condição:** Não reiniciar (usa o estado do teste anterior).
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `GET /cliente/2` | — | `href` do telefone 3 contém `/cliente/2/telefone/3`; `cliente` do telefone aponta para `/cliente/2`. |
-| 2 | `GET /cliente/1` | — | Nenhum `href` de filho contém `/cliente/2/`. |
-| 3 | `GET /cliente/999` | — | 404 com corpo `{"erro": "..."}`, sem `links`. |
-
-**Resultado:** Aprovado
-
-## Teste 32 — Método HTTP não permitido (405)
-
-**Grupo:** Erros · **Pré-condição:** Qualquer estado.
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `POST /cliente/lista` | `{}` | 405 {"erro": "Método HTTP não permitido para esta rota"}. |
-| 2 | `DELETE /cliente/1/endereco` | — | 405, mesmo corpo. |
-| 3 | `GET /cliente/lista` | — | 200. |
-
-**Resultado:** Aprovado
-
-## Teste 33 — Content-Type não suportado (415)
-
-**Grupo:** Erros · **Pré-condição:** Qualquer estado.
-
-| # | Requisição | Corpo | Esperado |
-|---|---|---|---|
-| 1 | `PUT /cliente/atualizar` com corpo em formulário (`application/x-www-form-urlencoded`) | `id=1` | 415 {"erro": "Tipo de conteúdo não suportado: use application/json"}. |
-| 2 | `PUT /cliente/atualizar` com JSON | `{"id": 1, "nome": "Teste 415"}` | 200 sem corpo. |
-
-**Resultado:** Aprovado
+- T34–T41: Empresa (CRUD) — Aprovado
+- T42–T51: Empresa, telefones e endereço — Aprovado
+- T52–T59: Usuário (CRUD) — Aprovado
+- T60–T75: Usuário, telefones, documentos, e-mails e endereço — Aprovado
+- T76–T83: Credenciais — Aprovado
+- T84–T95c: Mercadoria, serviço e vínculo fornecedor — Aprovado
+- T96–T99b: Veículo — Aprovado
+- T100–T101: Links e isolamento entre empresas — Aprovado
+- T102–T108b: Venda — Aprovado
+
+## Empresa (T34–T51)
+- T34, T35: GET lista e por id, com `links`.
+- T35b: GET inexistente → 404 `Empresa não encontrada: id 999`.
+- T36: POST `{}` → 400 (`razaoSocial`, `endereco`). T36b: POST completo → 201, `cadastro` preenchido, `usuarios: []`.
+- T37: PUT parcial: campo em branco não sobrescreve; usuários e vendas intactos.
+- T38: PUT sem id → 400 `Id é obrigatório`. T38b: id inexistente → 404.
+- T39: PUT com lista de telefones: insere, atualiza e remove os ausentes.
+- T40, T40b: DELETE → 200 e 404 depois; sem id → 400.
+- T41: DELETE da empresa 1 apaga usuários e vendas (lista vazia).
+- T42–T47: telefones da empresa: GET, POST (400 e 201), PUT parcial, DELETE e isolamento (telefone de usuário → 404).
+- T48–T49c: endereço: GET e PUT parcial (branco ignorado, id imutável). T50: links navegáveis. T51: DELETE → 405.
+
+## Usuário (T52–T75)
+- T52, T53: GET lista e por id (404 para usuário ou empresa inexistente).
+- T54–T54e: POST `{}` → 400; completo → 201; e-mail inválido → 400; documento repetido → 409; perfil inexistente → 400.
+- T55–T55c: PUT parcial de nome, nomeSocial, perfis e endereço; `nome` em branco ignorado; inexistente → 404.
+- T56: isolamento entre empresas → 404.
+- T57: DELETE libera o número de documento. T58: usuário com vendas → 409. T58b: fornecedor sem vendas → 200 e mercadoria preservada.
+- T60–T65: telefones do usuário (CRUD, 404 e isolamento entre usuários).
+- T66–T70c: documentos (CRUD, duplicado → 409, último documento → 409, número liberado após DELETE).
+- T71–T72c: e-mails (validação, CRUD, remover o último é permitido).
+- T73–T75: endereço (GET, PUT parcial) e links; DELETE → 405.
+
+## Credenciais (T76–T83)
+- T76, T76b, T82: a `senha` nunca aparece nas respostas.
+- T77–T77h: POST sem `tipo` ou com tipo inválido → 400; campos obrigatórios; `nomeUsuario` e `codigo` repetidos → 409; 201 com `criacao` e `inativo=false`.
+- T78–T79f: GET; PUT parcial; troca de tipo → 400; conflito → 409.
+- T80, T81, T83: DELETE; isolamento entre usuários; remover a última é permitido.
+
+## Mercadoria, serviço, vínculo e veículo (T84–T101)
+- T84–T90b: CRUD de mercadoria e serviço (validação, PUT parcial com valor negativo ignorado, 404).
+- T91–T94: vínculo fornecedor ↔ mercadoria: só FORNECEDOR (409); associar e desassociar sem apagar a mercadoria.
+- T95–T95c: excluir item que consta em venda → 409; excluir mercadoria remove o vínculo.
+- T96–T99b: veículo por usuário (CRUD, tipo inválido → 400, isolamento, em venda → 409).
+- T100: links da empresa sem repetição. T101: isolamento entre empresas.
+
+## Venda (T102–T108b)
+- T102, T103: GET lista e por id; `cliente` e `funcionario` resumidos; links.
+- T104–T104i: POST `{}` → 400; venda vazia, perfil errado e identificação duplicada → 409; ids inexistentes → 404; completo → 201.
+- T105–T105e: PUT parcial; venda vazia → 409; `clienteId` ignorado.
+- T106: isolamento entre empresas. T107: links na empresa.
+- T108, T108b: DELETE; sem vendas, itens e veículo podem ser excluídos.
