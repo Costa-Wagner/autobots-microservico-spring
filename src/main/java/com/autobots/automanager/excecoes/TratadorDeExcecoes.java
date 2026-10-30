@@ -125,6 +125,44 @@ public class TratadorDeExcecoes {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
 	}
 
+	//e-mail inexistente ou que não pertence ao usuário da rota → 404
+	@ExceptionHandler(EmailNaoEncontradoException.class)
+	public ResponseEntity<Map<String, String>> tratarEmailNaoEncontrado(EmailNaoEncontradoException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
+	//credencial inexistente ou que não pertence ao usuário da rota → 404
+	@ExceptionHandler(CredencialNaoEncontradaException.class)
+	public ResponseEntity<Map<String, String>> tratarCredencialNaoEncontrada(CredencialNaoEncontradaException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
+	//PUT tentando trocar o tipo da credencial → 400
+	@ExceptionHandler(TipoCredencialDiferenteException.class)
+	public ResponseEntity<Map<String, String>> tratarTipoCredencialDiferente(TipoCredencialDiferenteException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+	}
+
+	@ExceptionHandler(RecursoNaoEncontradoException.class)
+	public ResponseEntity<Map<String, String>> tratarRecursoNaoEncontrado(RecursoNaoEncontradoException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
+	@ExceptionHandler(ConflitoNegocioException.class)
+	public ResponseEntity<Map<String, String>> tratarConflitoNegocio(ConflitoNegocioException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", excecao.getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+
 	//qualquer erro não previsto pelos handlers acima → 500, com mensagem padrão pro cliente (e printStackTrace() pra você ver o que houve no console durante o desenvolvimento)
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Map<String, String>> tratarErroGenerico(Exception excecao) {

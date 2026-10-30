@@ -11,7 +11,10 @@ import org.springframework.stereotype.Component;
 import com.autobots.automanager.controles.EmpresaControle;
 import com.autobots.automanager.controles.EmpresaEnderecoControle;
 import com.autobots.automanager.controles.EmpresaTelefoneControle;
+import com.autobots.automanager.controles.MercadoriaControle;
+import com.autobots.automanager.controles.ServicoControle;
 import com.autobots.automanager.controles.UsuarioControle;
+import com.autobots.automanager.controles.VendaControle;
 import com.autobots.automanager.entidades.Empresa;
 
 @Component
@@ -22,6 +25,10 @@ public class AdicionadorLinkEmpresa implements AdicionadorLink<Empresa> {
 	private AdicionadorLinkUsuario usuarioAdicionador;
 	@Autowired
 	private AdicionadorLinkEmpresaEndereco enderecoAdicionador;
+	@Autowired
+	private AdicionadorLinkRecursos recursosAdicionador;
+	@Autowired
+	private AdicionadorLinkVenda vendaAdicionador;
 
 	@Override
 	public void adicionarLink(List<Empresa> lista) {
@@ -44,5 +51,13 @@ public class AdicionadorLinkEmpresa implements AdicionadorLink<Empresa> {
 		if (empresa.getEndereco() != null) {
 			enderecoAdicionador.adicionarLink(empresa.getId(), empresa.getEndereco());
 		}
+		empresa.add(linkTo(methodOn(MercadoriaControle.class).listar(empresa.getId())).withRel("mercadorias"));
+		empresa.add(linkTo(methodOn(ServicoControle.class).listar(empresa.getId())).withRel("servicos"));
+		empresa.getMercadorias().forEach(m -> recursosAdicionador.adicionarLink(empresa.getId(), m));
+		empresa.getServicos().forEach(s -> recursosAdicionador.adicionarLink(empresa.getId(), s));
+		empresa.add(linkTo(methodOn(VendaControle.class)
+				.listar(empresa.getId())).withRel("vendas"));
+		empresa.getVendas().forEach(v ->
+				vendaAdicionador.adicionarLink(empresa.getId(), v));
 	}
 }

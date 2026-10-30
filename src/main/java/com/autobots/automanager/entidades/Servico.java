@@ -30,9 +30,10 @@ public class Servico extends RepresentationModel<Servico> {
 	@NotBlank(message = "Nome é obrigatório")
 	@Column(nullable = false)
 	private String nome;
+	@NotNull(message = "Valor é obrigatório")
 	@PositiveOrZero(message = "Valor não pode ser negativo")
 	@Column(nullable = false)
-	private double valor;
+	private Double valor;
 	@Column
 	private String descricao;
 }

@@ -15,6 +15,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import com.autobots.automanager.enumeracoes.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,8 +25,12 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 public class CredencialUsuarioSenha extends Credencial {
+@NotBlank(message = "Nome de usuário é obrigatório")
 	@Column(nullable = false, unique = true)
 	private String nomeUsuario;
+
+	@NotBlank(message = "Senha é obrigatória")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)   // aceita na entrada, nunca devolve
 	@Column(nullable = false)
 	private String senha;
 }

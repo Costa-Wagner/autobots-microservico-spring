@@ -15,6 +15,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import com.autobots.automanager.enumeracoes.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,9 +36,15 @@ public class Venda extends RepresentationModel<Venda> {
 	@Column(nullable = false, unique = true)
 	private String identificacao;
 
+	@JsonIgnoreProperties({ "perfis", "telefones", "endereco",
+		"documentos", "emails", "credenciais",
+		"mercadorias", "veiculos", "links" })
 	@ManyToOne
 	private Usuario cliente;
 
+	@JsonIgnoreProperties({ "perfis", "telefones", "endereco",
+			"documentos", "emails", "credenciais",
+			"mercadorias", "veiculos", "links" })
 	@ManyToOne
 	private Usuario funcionario;
 
