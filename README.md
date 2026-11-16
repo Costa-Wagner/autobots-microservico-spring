@@ -215,7 +215,7 @@ O AutoBots adota **microsserviços** no back-end. O `automanager` cuida do cadas
 | 2 | Verbos e status HTTP adequados | Atendido |
 | 3 | HATEOAS: links para as próximas ações | Atendido |
 
-As respostas de `GET` e `POST` com corpo trazem o array `links` (`rel` e `href`). `PUT` e `DELETE` respondem 200 sem corpo. Com `Accept: application/hal+json`, os links passam para `_links`.
+As respostas de `GET` e `POST` com corpo trazem os links no campo `_links` (formato HAL, padrão do Spring HATEOAS), no formato `"rel": { "href": "..." }`. `PUT` e `DELETE` respondem 200 sem corpo.
 
 | Recurso | Relações (`rel`) |
 |---|---|
