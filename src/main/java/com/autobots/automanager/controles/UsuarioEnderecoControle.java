@@ -1,4 +1,6 @@
 package com.autobots.automanager.controles;
+import com.autobots.automanager.configuracao.Regras;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import com.autobots.automanager.repositorios.EmpresaRepositorio;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/usuario/{usuarioId}/endereco")
+@PreAuthorize(Regras.USUARIO_GERENCIA)
 public class UsuarioEnderecoControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -23,6 +26,7 @@ public class UsuarioEnderecoControle {
 	private AdicionadorLinkUsuarioFilho adicionador;
 	private EnderecoAtualizador atualizador = new EnderecoAtualizador();
 
+	@PreAuthorize(Regras.USUARIO_LEITURA)
 	@GetMapping
 	public Endereco obter(@PathVariable long empresaId, @PathVariable long usuarioId) {
 		Endereco endereco = buscador.usuario(buscador.empresa(empresaId), usuarioId).getEndereco();

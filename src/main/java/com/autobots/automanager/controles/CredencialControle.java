@@ -1,4 +1,6 @@
 package com.autobots.automanager.controles;
+import com.autobots.automanager.configuracao.Regras;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Date;
 import java.util.List;
@@ -24,6 +26,7 @@ import com.autobots.automanager.entidades.CredencialUsuarioSenha;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/usuario/{usuarioId}/credencial")
+@PreAuthorize(Regras.USUARIO_GERENCIA)
 public class CredencialControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;

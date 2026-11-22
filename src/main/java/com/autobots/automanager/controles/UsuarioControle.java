@@ -5,6 +5,11 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import java.util.stream.Collectors;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.autobots.automanager.configuracao.Acesso;
+import com.autobots.automanager.configuracao.Regras;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +38,9 @@ public class UsuarioControle {
 	private EmpresaRepositorio repositorio;
 	@Autowired
 	private AdicionadorLinkUsuario adicionador;
+	@Autowired
+	private Acesso acesso;
+	
 	private UsuarioAtualizador atualizador = new UsuarioAtualizador();
 
 	private Empresa buscarEmpresa(long empresaId) {
@@ -57,13 +65,16 @@ public class UsuarioControle {
 						&& id.equals(v.getVeiculo().getProprietario().getId())));
 	}
 
+	@PreAuthorize(Regras.LEITURA_EQUIPE)
 	@GetMapping
 	public List<Usuario> listar(@PathVariable long empresaId) {
-		List<Usuario> lista = buscarEmpresa(empresaId).getUsuarios();
+		List<Usuario> lista = buscarEmpresa(empresaId).getUsuarios().stream()
+				.filter(acesso::visivel).collect(Collectors.toList());
 		lista.forEach(u -> adicionador.adicionarLink(empresaId, u));
 		return lista;
 	}
 
+	@PreAuthorize(Regras.USUARIO_LEITURA)
 	@GetMapping("/{usuarioId}")
 	public Usuario obter(@PathVariable long empresaId, @PathVariable long usuarioId) {
 		Usuario usuario = buscarUsuario(buscarEmpresa(empresaId), usuarioId);
@@ -71,6 +82,7 @@ public class UsuarioControle {
 		return usuario;
 	}
 
+	@PreAuthorize(Regras.USUARIO_CADASTRO)
 	@PostMapping
 	public ResponseEntity<Usuario> cadastrar(@PathVariable long empresaId, @Valid @RequestBody Usuario usuario) {
 		Empresa empresa = buscarEmpresa(empresaId);
@@ -90,6 +102,7 @@ public class UsuarioControle {
 		return ResponseEntity.status(HttpStatus.CREATED).body(criado);
 	}
 
+	@PreAuthorize(Regras.USUARIO_ATUALIZACAO)
 	@PutMapping("/{usuarioId}")
 	public ResponseEntity<Void> atualizar(@PathVariable long empresaId, @PathVariable long usuarioId,
 			@RequestBody Usuario atualizacao) {
@@ -99,6 +112,7 @@ public class UsuarioControle {
 		return ResponseEntity.ok().build();
 	}
 
+	@PreAuthorize(Regras.USUARIO_GERENCIA)
 	@DeleteMapping("/{usuarioId}")
 	public ResponseEntity<Void> excluir(@PathVariable long empresaId, @PathVariable long usuarioId) {
 		Empresa empresa = buscarEmpresa(empresaId);

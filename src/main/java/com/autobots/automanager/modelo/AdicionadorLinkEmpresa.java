@@ -56,7 +56,7 @@ public class AdicionadorLinkEmpresa implements AdicionadorLink<Empresa> {
 		empresa.getMercadorias().forEach(m -> recursosAdicionador.adicionarLink(empresa.getId(), m));
 		empresa.getServicos().forEach(s -> recursosAdicionador.adicionarLink(empresa.getId(), s));
 		empresa.add(linkTo(methodOn(VendaControle.class)
-				.listar(empresa.getId())).withRel("vendas"));
+				.listar(empresa.getId(), null)).withRel("vendas"));
 		empresa.getVendas().forEach(v ->
 				vendaAdicionador.adicionarLink(empresa.getId(), v));
 	}

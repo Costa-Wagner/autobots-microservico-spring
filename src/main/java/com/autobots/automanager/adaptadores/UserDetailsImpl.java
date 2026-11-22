@@ -44,4 +44,10 @@ public class UserDetailsImpl implements UserDetails {
 	@Override public boolean isAccountNonLocked() { return true; }
 	@Override public boolean isCredentialsNonExpired() { return true; }
 	@Override public boolean isEnabled() { return ativo; }
+	public boolean temRole(String role) {
+		return autoridades.stream().anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+	}
+	public boolean isGestao() {
+		return temRole("ADMIN") || temRole("GERENTE");
+	}
 }

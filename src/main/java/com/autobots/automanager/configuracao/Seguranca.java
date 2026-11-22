@@ -33,9 +33,7 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.cors().and().csrf().disable();
 		// /login é tratado pelo filtro Autenticador, antes desta regra
-		http.authorizeRequests()
-			.antMatchers("/empresa/*/usuario/**").hasAnyRole("ADMIN", "GERENTE")   // provisório até a R3
-			.anyRequest().authenticated();
+		http.authorizeRequests().anyRequest().authenticated();
 		http.addFilter(new Autenticador(authenticationManager(), provedorJwt));
 		http.addFilter(new Autorizador(authenticationManager(), provedorJwt, servico));
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

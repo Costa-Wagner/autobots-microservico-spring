@@ -1,4 +1,6 @@
 package com.autobots.automanager.controles;
+import com.autobots.automanager.configuracao.Regras;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -19,6 +21,7 @@ import com.autobots.automanager.repositorios.EmpresaRepositorio;
 // vínculo fornecedor <-> mercadoria (a mercadoria em si é criada em /empresa/{id}/mercadoria)
 @RestController
 @RequestMapping("/empresa/{empresaId}/usuario/{usuarioId}/mercadoria")
+@PreAuthorize(Regras.GESTAO)
 public class UsuarioMercadoriaControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;

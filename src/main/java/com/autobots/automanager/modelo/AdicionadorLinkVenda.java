@@ -14,8 +14,8 @@ import com.autobots.automanager.entidades.Venda;
 @Component
 public class AdicionadorLinkVenda {
 	public void adicionarLink(long empresaId, Venda v) {
-		v.add(linkTo(methodOn(VendaControle.class).obter(empresaId, v.getId())).withSelfRel());
-		v.add(linkTo(methodOn(VendaControle.class).listar(empresaId)).withRel("vendas"));
+		v.add(linkTo(methodOn(VendaControle.class).obter(empresaId, v.getId(), null)).withSelfRel());
+		v.add(linkTo(methodOn(VendaControle.class).listar(empresaId, null)).withRel("vendas"));
 		v.add(linkTo(methodOn(EmpresaControle.class).obterEmpresa(empresaId)).withRel("empresa"));
 		if (v.getCliente() != null) {
 			long clienteId = v.getCliente().getId();
