@@ -8,6 +8,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.autobots.automanager.entidades.CredencialUsuarioSenha;
 import com.autobots.automanager.entidades.Documento;
@@ -35,7 +36,9 @@ public class AutomanagerApplication {
 	@Component
 	public static class Runner implements ApplicationRunner {
 		@Autowired
-		public EmpresaRepositorio repositorio;
+		public EmpresaRepositorio repositorio;				
+		@Autowired
+		private BCryptPasswordEncoder codificador;
 
 		private Endereco endereco(String estado, String cidade, String bairro, String rua, String numero, String cep) {
 			Endereco e = new Endereco();
@@ -72,7 +75,7 @@ public class AutomanagerApplication {
 		private CredencialUsuarioSenha credencial(String nomeUsuario) {
 			CredencialUsuarioSenha c = new CredencialUsuarioSenha();
 			c.setNomeUsuario(nomeUsuario);
-			c.setSenha("123456");
+			c.setSenha(codificador.encode("123456"));
 			c.setCriacao(new Date());
 			c.setUltimoAcesso(new Date());
 			c.setInativo(false);
@@ -91,7 +94,7 @@ public class AutomanagerApplication {
 			Usuario funcionario = new Usuario();
 			funcionario.setNome("Pedro Alcântara de Bragança e Bourbon");
 			funcionario.setNomeSocial("Dom Pedro");
-			funcionario.getPerfis().add(PerfilUsuario.FUNCIONARIO);
+			funcionario.getPerfis().add(PerfilUsuario.VENDEDOR);
 			funcionario.setEndereco(endereco("São Paulo", "São Paulo", "Jardins", "Av. São Gabriel", "00", "01435-001"));
 			funcionario.getTelefones().add(telefone("11", "9854633728"));
 			funcionario.getDocumentos().add(documento(TipoDocumento.CPF, "85647381922"));
@@ -118,6 +121,24 @@ public class AutomanagerApplication {
 			cliente.getEmails().add(email("c@c.com"));
 			cliente.getCredenciais().add(credencial("dompedrocliente"));
 			empresa.getUsuarios().add(cliente);
+
+						Usuario admin = new Usuario();
+			admin.setNome("Administrador do sistema");
+			admin.getPerfis().add(PerfilUsuario.ADMIN);
+			admin.setEndereco(endereco("São Paulo", "São Paulo", "Bela Vista", "Av. Paulista", "1000", "01310-100"));
+			admin.getDocumentos().add(documento(TipoDocumento.CPF, "11111111111"));
+			admin.getEmails().add(email("admin@autobots.com"));
+			admin.getCredenciais().add(credencial("admin"));
+			empresa.getUsuarios().add(admin);
+
+			Usuario gerente = new Usuario();
+			gerente.setNome("Gerente da loja");
+			gerente.getPerfis().add(PerfilUsuario.GERENTE);
+			gerente.setEndereco(endereco("São Paulo", "São Paulo", "Moema", "Av. Ibirapuera", "2000", "04029-200"));
+			gerente.getDocumentos().add(documento(TipoDocumento.CPF, "22222222222"));
+			gerente.getEmails().add(email("gerente@autobots.com"));
+			gerente.getCredenciais().add(credencial("gerente"));
+			empresa.getUsuarios().add(gerente);
 
 			Veiculo veiculo = new Veiculo();
 			veiculo.setPlaca("ABC-0000");

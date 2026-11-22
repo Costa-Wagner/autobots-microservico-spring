@@ -13,7 +13,6 @@ public class VendaDados {
 	private String identificacao;
 	@NotNull(message = "Cliente é obrigatório")
 	private Long clienteId;
-	@NotNull(message = "Funcionário é obrigatório")
 	private Long funcionarioId;
 	private Long veiculoId;
 	private List<Long> mercadoriaIds;

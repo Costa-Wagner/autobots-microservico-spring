@@ -1,4 +1,6 @@
 package com.autobots.automanager.controles;
+import com.autobots.automanager.configuracao.Regras;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -20,6 +22,7 @@ import com.autobots.automanager.repositorios.EmpresaRepositorio;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/usuario/{usuarioId}/email")
+@PreAuthorize(Regras.USUARIO_GERENCIA)
 public class UsuarioEmailControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -36,6 +39,7 @@ public class UsuarioEmailControle {
 				.orElseThrow(() -> new EmailNaoEncontradoException(emailId));
 	}
 
+	@PreAuthorize(Regras.USUARIO_LEITURA)
 	@GetMapping
 	public List<Email> listar(@PathVariable long empresaId, @PathVariable long usuarioId) {
 		List<Email> lista = buscador.usuario(buscador.empresa(empresaId), usuarioId).getEmails();
@@ -43,6 +47,7 @@ public class UsuarioEmailControle {
 		return lista;
 	}
 
+	@PreAuthorize(Regras.USUARIO_LEITURA)
 	@GetMapping("/{emailId}")
 	public Email obter(@PathVariable long empresaId, @PathVariable long usuarioId, @PathVariable long emailId) {
 		Usuario usuario = buscador.usuario(buscador.empresa(empresaId), usuarioId);

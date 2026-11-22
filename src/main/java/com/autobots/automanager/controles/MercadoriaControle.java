@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.autobots.automanager.entidades.Empresa;
 import com.autobots.automanager.entidades.Mercadoria;
@@ -18,9 +19,11 @@ import com.autobots.automanager.modelo.AdicionadorLinkRecursos;
 import com.autobots.automanager.modelo.BuscadorUsuario;
 import com.autobots.automanager.modelo.MercadoriaAtualizador;
 import com.autobots.automanager.repositorios.EmpresaRepositorio;
+import com.autobots.automanager.configuracao.Regras;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/mercadoria")
+@PreAuthorize(Regras.GESTAO)
 public class MercadoriaControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -37,6 +40,7 @@ public class MercadoriaControle {
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Mercadoria não encontrada", id));
 	}
 
+	@PreAuthorize(Regras.LEITURA_EQUIPE)
 	@GetMapping
 	public List<Mercadoria> listar(@PathVariable long empresaId) {
 		List<Mercadoria> lista = buscador.empresa(empresaId).getMercadorias();
@@ -44,6 +48,7 @@ public class MercadoriaControle {
 		return lista;
 	}
 
+	@PreAuthorize(Regras.LEITURA_EQUIPE)
 	@GetMapping("/{mercadoriaId}")
 	public Mercadoria obter(@PathVariable long empresaId, @PathVariable long mercadoriaId) {
 		Mercadoria m = buscar(buscador.empresa(empresaId), mercadoriaId);

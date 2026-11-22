@@ -1,4 +1,6 @@
 package com.autobots.automanager.controles;
+import com.autobots.automanager.configuracao.Regras;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -21,6 +23,7 @@ import com.autobots.automanager.repositorios.EmpresaRepositorio;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/usuario/{usuarioId}/veiculo")
+@PreAuthorize(Regras.USUARIO_GERENCIA)
 public class UsuarioVeiculoControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -37,6 +40,7 @@ public class UsuarioVeiculoControle {
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado", id));
 	}
 
+	@PreAuthorize(Regras.USUARIO_LEITURA)
 	@GetMapping
 	public List<Veiculo> listar(@PathVariable long empresaId, @PathVariable long usuarioId) {
 		List<Veiculo> lista = buscador.usuario(buscador.empresa(empresaId), usuarioId).getVeiculos();
@@ -44,6 +48,7 @@ public class UsuarioVeiculoControle {
 		return lista;
 	}
 
+	@PreAuthorize(Regras.USUARIO_LEITURA)
 	@GetMapping("/{veiculoId}")
 	public Veiculo obter(@PathVariable long empresaId, @PathVariable long usuarioId, @PathVariable long veiculoId) {
 		Veiculo v = buscar(buscador.usuario(buscador.empresa(empresaId), usuarioId), veiculoId);

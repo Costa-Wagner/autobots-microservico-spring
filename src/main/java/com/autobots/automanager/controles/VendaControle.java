@@ -10,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.autobots.automanager.adaptadores.UserDetailsImpl;
 
 import com.autobots.automanager.entidades.Empresa;
 import com.autobots.automanager.entidades.Mercadoria;
@@ -24,9 +29,11 @@ import com.autobots.automanager.modelo.BuscadorUsuario;
 import com.autobots.automanager.modelo.StringVerificadorNulo;
 import com.autobots.automanager.modelo.VendaDados;
 import com.autobots.automanager.repositorios.EmpresaRepositorio;
+import com.autobots.automanager.configuracao.Regras;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/venda")
+@PreAuthorize(Regras.GESTAO)
 public class VendaControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -51,13 +58,25 @@ public class VendaControle {
 		return u;
 	}
 
+	// gestão vê tudo; vendedor vê as vendas em que é o funcionário; cliente vê as em que é o consumidor
+	private boolean visivel(Venda v, UserDetailsImpl u) {
+		if (u.isGestao()) {
+			return true;
+		}
+		Long id = u.getUsuarioId();
+		if (u.temRole("VENDEDOR") && v.getFuncionario() != null && id.equals(v.getFuncionario().getId())) {
+			return true;
+		}
+		return u.temRole("CLIENTE") && v.getCliente() != null && id.equals(v.getCliente().getId());
+	}
+
 	// aplica os dados recebidos; campo omitido (null) = sem alteração
 	private void preencher(Venda venda, Empresa empresa, VendaDados d) {
 		if (!verificador.verificar(d.getIdentificacao())) {
 			venda.setIdentificacao(d.getIdentificacao());
 		}
 		if (d.getFuncionarioId() != null) {
-			venda.setFuncionario(comPerfil(empresa, d.getFuncionarioId(), PerfilUsuario.FUNCIONARIO));
+			venda.setFuncionario(comPerfil(empresa, d.getFuncionarioId(), PerfilUsuario.VENDEDOR));
 		}
 		if (d.getMercadoriaIds() != null) {
 			List<Mercadoria> itens = d.getMercadoriaIds().stream().distinct()
@@ -87,23 +106,37 @@ public class VendaControle {
 		}
 	}
 
+	@PreAuthorize(Regras.LEITURA_TODOS)
 	@GetMapping
-	public List<Venda> listar(@PathVariable long empresaId) {
-		List<Venda> lista = buscador.empresa(empresaId).getVendas();
+	public List<Venda> listar(@PathVariable long empresaId, @AuthenticationPrincipal UserDetailsImpl logado) {
+		List<Venda> lista = buscador.empresa(empresaId).getVendas().stream()
+				.filter(v -> visivel(v, logado)).collect(Collectors.toList());
 		lista.forEach(v -> adicionador.adicionarLink(empresaId, v));
 		return lista;
 	}
 
+	@PreAuthorize(Regras.LEITURA_TODOS)
 	@GetMapping("/{vendaId}")
-	public Venda obter(@PathVariable long empresaId, @PathVariable long vendaId) {
+	public Venda obter(@PathVariable long empresaId, @PathVariable long vendaId,
+			@AuthenticationPrincipal UserDetailsImpl logado) {
 		Venda venda = buscar(buscador.empresa(empresaId), vendaId);
+		if (!visivel(venda, logado)) {
+			throw new AccessDeniedException("Venda de outro usuário");
+		}
 		adicionador.adicionarLink(empresaId, venda);
 		return venda;
 	}
 
+	@PreAuthorize(Regras.LEITURA_EQUIPE)
 	@PostMapping
-	public ResponseEntity<Venda> cadastrar(@PathVariable long empresaId, @Valid @RequestBody VendaDados dados) {
+	public ResponseEntity<Venda> cadastrar(@PathVariable long empresaId, @Valid @RequestBody VendaDados dados,
+			@AuthenticationPrincipal UserDetailsImpl logado) {
 		Empresa empresa = buscador.empresa(empresaId);
+		if (!logado.isGestao()) {
+			dados.setFuncionarioId(logado.getUsuarioId());   // vendedor só vende em nome próprio
+		} else if (dados.getFuncionarioId() == null) {
+			throw new ConflitoNegocioException("Funcionário é obrigatório");
+		}
 		Venda venda = new Venda();
 		venda.setCadastro(new Date());
 		venda.setCliente(comPerfil(empresa, dados.getClienteId(), PerfilUsuario.CLIENTE));

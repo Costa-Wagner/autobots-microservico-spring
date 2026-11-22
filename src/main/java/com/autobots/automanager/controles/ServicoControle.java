@@ -1,4 +1,5 @@
 package com.autobots.automanager.controles;
+import com.autobots.automanager.configuracao.Regras;
 
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.autobots.automanager.entidades.Empresa;
 import com.autobots.automanager.entidades.Servico;
@@ -17,9 +19,11 @@ import com.autobots.automanager.modelo.AdicionadorLinkRecursos;
 import com.autobots.automanager.modelo.BuscadorUsuario;
 import com.autobots.automanager.modelo.ServicoAtualizador;
 import com.autobots.automanager.repositorios.EmpresaRepositorio;
+import com.autobots.automanager.repositorios.EmpresaRepositorio;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/servico")
+@PreAuthorize(Regras.GESTAO)
 public class ServicoControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -36,6 +40,7 @@ public class ServicoControle {
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado", id));
 	}
 
+	@PreAuthorize(Regras.LEITURA_EQUIPE)
 	@GetMapping
 	public List<Servico> listar(@PathVariable long empresaId) {
 		List<Servico> lista = buscador.empresa(empresaId).getServicos();
@@ -43,6 +48,7 @@ public class ServicoControle {
 		return lista;
 	}
 
+	@PreAuthorize(Regras.LEITURA_EQUIPE)
 	@GetMapping("/{servicoId}")
 	public Servico obter(@PathVariable long empresaId, @PathVariable long servicoId) {
 		Servico s = buscar(buscador.empresa(empresaId), servicoId);
