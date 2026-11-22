@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.autobots.automanager.entidades.Credencial;
 import com.autobots.automanager.entidades.Empresa;
@@ -19,6 +20,7 @@ import com.autobots.automanager.modelo.AdicionadorLinkCredencial;
 import com.autobots.automanager.modelo.BuscadorUsuario;
 import com.autobots.automanager.modelo.CredencialAtualizador;
 import com.autobots.automanager.repositorios.EmpresaRepositorio;
+import com.autobots.automanager.entidades.CredencialUsuarioSenha;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/usuario/{usuarioId}/credencial")
@@ -29,6 +31,9 @@ public class CredencialControle {
 	private BuscadorUsuario buscador;
 	@Autowired
 	private AdicionadorLinkCredencial adicionador;
+	@Autowired
+	private BCryptPasswordEncoder codificador;
+
 	private CredencialAtualizador atualizador = new CredencialAtualizador();
 
 	private Credencial buscarCredencial(Usuario usuario, long credencialId) {
@@ -60,6 +65,10 @@ public class CredencialControle {
 		Empresa empresa = buscador.empresa(empresaId);
 		Usuario usuario = buscador.usuario(empresa, usuarioId);
 		credencial.setId(null);
+		if (credencial instanceof CredencialUsuarioSenha) {
+			CredencialUsuarioSenha us = (CredencialUsuarioSenha) credencial;
+			us.setSenha(codificador.encode(us.getSenha()));   // nunca grava senha em texto puro
+		}
 		credencial.setCriacao(new Date());   // controlados pelo servidor
 		credencial.setUltimoAcesso(null);
 		credencial.setInativo(Boolean.TRUE.equals(credencial.getInativo()));
@@ -79,6 +88,12 @@ public class CredencialControle {
 		Credencial atual = buscarCredencial(usuario, credencialId);
 		if (!atual.getClass().equals(atualizacao.getClass())) {
 			throw new TipoCredencialDiferenteException();
+		}
+		if (atualizacao instanceof CredencialUsuarioSenha) {
+			CredencialUsuarioSenha us = (CredencialUsuarioSenha) atualizacao;
+			if (us.getSenha() != null && !us.getSenha().isBlank()) {   // senha omitida = sem alteração
+				us.setSenha(codificador.encode(us.getSenha()));
+			}
 		}
 		atualizador.atualizar(atual, atualizacao);
 		repositorio.save(empresa);

@@ -57,7 +57,7 @@ public class VendaControle {
 			venda.setIdentificacao(d.getIdentificacao());
 		}
 		if (d.getFuncionarioId() != null) {
-			venda.setFuncionario(comPerfil(empresa, d.getFuncionarioId(), PerfilUsuario.FUNCIONARIO));
+			venda.setFuncionario(comPerfil(empresa, d.getFuncionarioId(), PerfilUsuario.VENDEDOR));
 		}
 		if (d.getMercadoriaIds() != null) {
 			List<Mercadoria> itens = d.getMercadoriaIds().stream().distinct()

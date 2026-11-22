@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.security.access.AccessDeniedException;
 
 @RestControllerAdvice   // intercepta exceções lançadas por qualquer @RestController do projeto
 public class TratadorDeExcecoes {
@@ -161,6 +162,14 @@ public class TratadorDeExcecoes {
 		Map<String, String> erro = new LinkedHashMap<>();
 		erro.put("erro", excecao.getMessage());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+
+	//perfil sem permissão (lançado pelo @PreAuthorize) → 403
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<Map<String, String>> tratarAcessoNegado(AccessDeniedException excecao) {
+		Map<String, String> erro = new LinkedHashMap<>();
+		erro.put("erro", "Acesso negado para o seu perfil");
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(erro);
 	}
 
 	//qualquer erro não previsto pelos handlers acima → 500, com mensagem padrão pro cliente (e printStackTrace() pra você ver o que houve no console durante o desenvolvimento)

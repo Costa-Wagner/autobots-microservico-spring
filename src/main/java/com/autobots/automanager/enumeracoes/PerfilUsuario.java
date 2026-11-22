@@ -1,3 +1,3 @@
 package com.autobots.automanager.enumeracoes;
 
-public enum PerfilUsuario { CLIENTE, FUNCIONARIO, FORNECEDOR }
+public enum PerfilUsuario { ADMIN, GERENTE, VENDEDOR, CLIENTE, FORNECEDOR }
