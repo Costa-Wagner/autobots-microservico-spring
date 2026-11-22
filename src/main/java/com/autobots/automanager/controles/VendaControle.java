@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.autobots.automanager.entidades.Empresa;
 import com.autobots.automanager.entidades.Mercadoria;
@@ -24,9 +25,11 @@ import com.autobots.automanager.modelo.BuscadorUsuario;
 import com.autobots.automanager.modelo.StringVerificadorNulo;
 import com.autobots.automanager.modelo.VendaDados;
 import com.autobots.automanager.repositorios.EmpresaRepositorio;
+import com.autobots.automanager.configuracao.Regras;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/venda")
+@PreAuthorize(Regras.GESTAO)
 public class VendaControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;

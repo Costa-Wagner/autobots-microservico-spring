@@ -16,13 +16,15 @@ import com.autobots.automanager.enumeracoes.PerfilUsuario;
 @SuppressWarnings("serial")
 public class UserDetailsImpl implements UserDetails {
 	private final Long usuarioId;
+	private final Long empresaId;
 	private final String nomeUsuario;
 	private final String senha;
 	private final boolean ativo;
 	private final List<GrantedAuthority> autoridades = new ArrayList<>();
 
-	public UserDetailsImpl(Usuario usuario, CredencialUsuarioSenha credencial) {
+	public UserDetailsImpl(Usuario usuario, CredencialUsuarioSenha credencial, Long empresaId) {
 		this.usuarioId = usuario.getId();
+		this.empresaId = empresaId;
 		this.nomeUsuario = credencial.getNomeUsuario();
 		this.senha = credencial.getSenha();
 		this.ativo = !Boolean.TRUE.equals(credencial.getInativo());
@@ -34,6 +36,7 @@ public class UserDetailsImpl implements UserDetails {
 	}
 
 	public Long getUsuarioId() { return usuarioId; }
+	public Long getEmpresaId() { return empresaId; }
 	@Override public Collection<? extends GrantedAuthority> getAuthorities() { return autoridades; }
 	@Override public String getPassword() { return senha; }
 	@Override public String getUsername() { return nomeUsuario; }

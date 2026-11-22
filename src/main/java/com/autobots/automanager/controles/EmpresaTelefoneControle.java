@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.autobots.automanager.entidades.Empresa;
 import com.autobots.automanager.entidades.Telefone;
@@ -23,9 +24,11 @@ import com.autobots.automanager.excecoes.TelefoneNaoEncontradoException;
 import com.autobots.automanager.modelo.AdicionadorLinkEmpresaTelefone;
 import com.autobots.automanager.modelo.TelefoneAtualizador;
 import com.autobots.automanager.repositorios.EmpresaRepositorio;
+import com.autobots.automanager.configuracao.Regras;
 
 @RestController
 @RequestMapping("/empresa/{empresaId}/telefone")
+@PreAuthorize(Regras.SOMENTE_ADMIN)
 public class EmpresaTelefoneControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -45,6 +48,7 @@ public class EmpresaTelefoneControle {
 				.orElseThrow(() -> new TelefoneNaoEncontradoException(telefoneId));
 	}
 
+	@PreAuthorize(Regras.LEITURA_TODOS)
 	@GetMapping
 	public List<Telefone> listar(@PathVariable long empresaId) {
 		List<Telefone> lista = buscarEmpresa(empresaId).getTelefones();
@@ -52,6 +56,7 @@ public class EmpresaTelefoneControle {
 		return lista;
 	}
 
+	@PreAuthorize(Regras.LEITURA_TODOS)
 	@GetMapping("/{telefoneId}")
 	public Telefone obter(@PathVariable long empresaId, @PathVariable long telefoneId) {
 		Telefone telefone = buscarTelefone(buscarEmpresa(empresaId), telefoneId);

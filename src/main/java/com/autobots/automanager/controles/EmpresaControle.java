@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.autobots.automanager.entidades.Empresa;
 import com.autobots.automanager.excecoes.EmpresaNaoEncontradaException;
@@ -25,9 +26,11 @@ import com.autobots.automanager.excecoes.IdNaoInformadoException;
 import com.autobots.automanager.modelo.AdicionadorLinkEmpresa;
 import com.autobots.automanager.modelo.EmpresaAtualizador;
 import com.autobots.automanager.repositorios.EmpresaRepositorio;
+import com.autobots.automanager.configuracao.Regras;
 
 @RestController
 @RequestMapping("/empresa")
+@PreAuthorize(Regras.SOMENTE_ADMIN)
 public class EmpresaControle {
 	@Autowired
 	private EmpresaRepositorio repositorio;
@@ -46,6 +49,7 @@ public class EmpresaControle {
 		return empresas;
 	}
 
+	@PreAuthorize(Regras.GESTAO_ID)
 	@GetMapping("/{id}")
 	public ResponseEntity<Empresa> obterEmpresa(@PathVariable long id) {
 		Empresa empresa = buscarEmpresa(id);

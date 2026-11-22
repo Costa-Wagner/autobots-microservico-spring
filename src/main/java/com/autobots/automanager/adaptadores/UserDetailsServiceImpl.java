@@ -9,12 +9,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.autobots.automanager.entidades.CredencialUsuarioSenha;
 import com.autobots.automanager.entidades.Usuario;
+import com.autobots.automanager.repositorios.EmpresaRepositorio;
 import com.autobots.automanager.repositorios.UsuarioRepositorio;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 	@Autowired
 	private UsuarioRepositorio repositorio;
+	@Autowired
+	private EmpresaRepositorio empresas;
 
 	// @Transactional: os filtros rodam antes do MVC, sem sessão aberta; sem isso perfis e credenciais (lazy) falham
 	@Override
@@ -28,6 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 				.filter(c -> nomeUsuario.equals(c.getNomeUsuario()))
 				.findFirst()
 				.orElseThrow(() -> new UsernameNotFoundException(nomeUsuario));
-		return new UserDetailsImpl(usuario, credencial);
+		Long empresaId = empresas.buscarIdPorUsuario(usuario.getId()).orElse(null);
+		return new UserDetailsImpl(usuario, credencial, empresaId);
 	}
 }
